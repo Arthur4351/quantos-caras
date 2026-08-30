@@ -4,6 +4,8 @@ import { BattleSystem, calculateDamage } from '../systems/BattleSystem';
 import { calculateSynergyBonus } from '../systems/Synergy';
 import { Dude } from '../entities/Dude';
 import { Enemy } from '../entities/Enemy';
+import { RelicSystem } from '../systems/RelicSystem';
+import { storage } from '../utils/storage';
 import waves from '../data/waves.json';
 import { DudeData } from '../types/DudeData';
 
@@ -12,10 +14,12 @@ export class Battle extends Phaser.Scene {
   enemies: Enemy[] = [];
   waveManager!: WaveManager;
   battleSystem!: BattleSystem;
+  relicSystem!: RelicSystem;
   wave = 1;
   dudesData: DudeData[] = [];
   battleActive = false;
   resultText?: Phaser.GameObjects.Text;
+  hasRevived = false;
 
   constructor() { super('Battle'); }
 
@@ -31,6 +35,8 @@ export class Battle extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#1e2a3a');
     this.waveManager = new WaveManager(waves as any);
     this.battleSystem = new BattleSystem();
+    const savedRelics = storage.load('relics') || [];
+    this.relicSystem = new RelicSystem(savedRelics);
 
     this.add.rectangle(960, 540, 1400, 700, 0x2c3e50).setStrokeStyle(4, 0x34495e);
     this.add.text(960, 80, `WAVE ${this.wave}`, { fontSize: '36px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
@@ -55,7 +61,35 @@ export class Battle extends Phaser.Scene {
 
     this.enemies = this.waveManager.spawn(this, this.wave);
 
+    if (this.relicSystem.hasMeteor()) {
+      this.add.text(960, 940, '☄️ METEOR ativo! Clique na arena para causar 100 dano em área!', { fontSize: '14px', color: '#f1c40f', backgroundColor: '#2c3e50' } as any).setOrigin(0.5).setPadding(6, 4, 6, 4);
+      this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        if (!this.battleActive) return;
+        const dmg = this.relicSystem.meteorDamage();
+        let hitCount = 0;
+        this.enemies.forEach(e => {
+          if (!e.isAlive()) return;
+          const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, e.x, e.y);
+          if (dist < 150) {
+            e.takeDamage(dmg);
+            hitCount++;
+            if ((e as any).label) (e as any).label.setText(`${e.type} ${Math.max(0, Math.floor(e.currentHp))}hp`);
+            this.tweens.add({ targets: e, alpha: 0.3, duration: 100, yoyo: true });
+          }
+        });
+        if (hitCount > 0) {
+          this.cameras.main.shake(200, 0.01);
+          // meteor effect circle
+          const c = this.add.circle(pointer.x, pointer.y, 10, 0xe74c3c, 0.6);
+          this.tweens.add({ targets: c, radius: 150, alpha: 0, duration: 400, onComplete: () => c.destroy() });
+          try { if (this.cache.audio.exists('meteor')) this.sound.play('meteor', { volume: 0.6 }); } catch {}
+        }
+      });
+    }
+
     this.add.text(960, 980, 'Dudes atacam automaticamente o alvo mais próximo', { fontSize: '14px', color: '#aaa' }).setOrigin(0.5);
+    // mute toggle
+    this.input.keyboard?.on('keydown-M', () => { this.sound.mute = !this.sound.mute; });
 
     this.battleActive = true;
 
@@ -131,7 +165,19 @@ export class Battle extends Phaser.Scene {
       }
     });
 
-    const result = this.battleSystem.checkWin(this.dudes as any, this.enemies as any);
+    // Revive logic: if all dudes dead but we have revive token and hasn't used
+    let result = this.battleSystem.checkWin(this.dudes as any, this.enemies as any);
+    if (result === 'lose' && this.relicSystem.hasRevive() && !this.hasRevived) {
+      const dead = this.dudes.find(d => !d.isAlive());
+      if (dead) {
+        dead.heal(dead.data.stats.hp * 0.5);
+        this.hasRevived = true;
+        this.add.text(dead.x, dead.y - 50, 'REVIVE! +50% HP', { fontSize: '14px', color: '#2ecc71', backgroundColor: '#000' } as any).setOrigin(0.5);
+        this.cameras.main.flash(300, 46, 204, 113);
+        result = 'ongoing';
+      }
+    }
+
     if (result === 'win') {
       this.battleActive = false;
       if (this.resultText) this.resultText.setText('VITÓRIA!').setColor('#2ecc71');

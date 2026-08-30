@@ -8,6 +8,11 @@ export class Boot extends Phaser.Scene {
   preload() {
     // Use missing.png as placeholder for all sprites initially
     this.load.image('missing', 'assets/sprites/missing.png');
+    // Audio - fail gracefully if files missing (handled via loaderror)
+    this.load.audio('bgm', 'assets/audio/bgm.mp3');
+    this.load.audio('hit', 'assets/audio/hit.wav');
+    this.load.audio('coin', 'assets/audio/coin.wav');
+    this.load.audio('meteor', 'assets/audio/meteor.wav');
     this.load.on('loaderror', (file: any) => {
       console.warn('loaderror', file.key, file.src);
     });
@@ -31,6 +36,21 @@ export class Boot extends Phaser.Scene {
       g.fillRect(0, 0, 64, 64);
       g.generateTexture('missing', 64, 64);
       g.destroy();
+    }
+
+    // Audio setup - try to play BGM if loaded, otherwise silent
+    try {
+      if (this.cache.audio.exists('bgm')) {
+        const music = this.sound.add('bgm', { loop: true, volume: 0.35 });
+        if (!this.sound.locked) {
+          music.play();
+        } else {
+          this.sound.once(Phaser.Sound.Events.UNLOCKED, () => music.play());
+        }
+        // mute toggle is handled per-scene via M key
+      }
+    } catch (e) {
+      console.warn('Audio init failed', e);
     }
 
     this.scene.start('Menu');
