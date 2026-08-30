@@ -1,0 +1,12 @@
+[
+  { "wave": 1, "enemies": [{ "type": "toddler", "count": 8, "hp": 20, "atk": 5 }], "rewardGold": 5 },
+  { "wave": 2, "enemies": [{ "type": "toddler", "count": 12, "hp": 22, "atk": 5 }], "rewardGold": 6 },
+  { "wave": 3, "enemies": [{ "type": "toddler", "count": 15, "hp": 24, "atk": 6 }], "rewardGold": 6 },
+  { "wave": 4, "enemies": [{ "type": "wolf", "count": 6, "hp": 40, "atk": 10 }], "rewardGold": 7 },
+  { "wave": 5, "enemies": [{ "type": "wolf", "count": 8, "hp": 45, "atk": 11 }], "rewardGold": 7 },
+  { "wave": 6, "enemies": [{ "type": "wolf", "count": 10, "hp": 50, "atk": 12 }], "rewardGold": 8 },
+  { "wave": 7, "enemies": [{ "type": "toddler", "count": 10, "hp": 30, "atk": 6 }, { "type": "wolf", "count": 5, "hp": 55, "atk": 12 }], "rewardGold": 8 },
+  { "wave": 8, "enemies": [{ "type": "wolf", "count": 12, "hp": 60, "atk": 13 }], "rewardGold": 9 },
+  { "wave": 9, "enemies": [{ "type": "toddler", "count": 12, "hp": 35, "atk": 7 }, { "type": "wolf", "count": 8, "hp": 65, "atk": 14 }], "rewardGold": 9 },
+  { "wave": 10, "enemies": [{ "type": "gorilla", "count": 1, "hp": 800, "atk": 30 }], "rewardGold": 10 }
+]

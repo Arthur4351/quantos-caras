@@ -1,0 +1,7 @@
+{
+  "Warrior": { "color": "#c0392b", "synergy": [{ "count": 2, "bonusAtk": 0.15 }] },
+  "Undead": { "color": "#27ae60", "synergy": [{ "count": 2, "bonusHp": 0.2 }] },
+  "Employed": { "color": "#2980b9", "synergy": [{ "count": 2, "bonusGold": 1 }] },
+  "Fantasy": { "color": "#8e44ad", "synergy": [{ "count": 2, "bonusAtk": 0.2 }] },
+  "SciFi": { "color": "#16a085", "synergy": [{ "count": 2, "bonusAtk": 0.15 }] }
+}

@@ -1,0 +1,5 @@
+[
+  { "id": "meteor", "name": "Meteor", "description": "Causa 100 dano em área", "type": "active", "effect": { "target": "areaDamage", "value": 100 } },
+  { "id": "revive", "name": "Revive Token", "description": "Revive 1 dude com 50% HP", "type": "passive", "effect": { "target": "revive", "value": 0.5 } },
+  { "id": "coinpurse", "name": "Coin Purse", "description": "+2 ouro por wave", "type": "passive", "effect": { "target": "goldPerWave", "value": 2 } }
+]
