@@ -1,0 +1,12 @@
+[
+  { "id": "gloves", "name": "Gloves", "bonusAtk": 5, "description": "+5 ATK" },
+  { "id": "boots", "name": "Boots", "bonusMove": 20, "description": "+20 MoveSpeed" },
+  { "id": "glasses", "name": "Glasses", "bonusRange": 30, "description": "+30 Range" },
+  { "id": "bandage", "name": "Bandage", "bonusHp": 20, "description": "+20 HP" },
+  { "id": "battery", "name": "Battery", "bonusAS": 0.15, "description": "+15% Attack Speed" },
+  { "id": "charm", "name": "Charm", "bonusCrit": 0.10, "description": "+10% Crit" },
+  { "id": "helm", "name": "Helm", "bonusHp": 30, "description": "+30 HP" },
+  { "id": "scope", "name": "Scope", "bonusRange": 50, "description": "+50 Range" },
+  { "id": "ring", "name": "Ring", "bonusAtk": 8, "description": "+8 ATK" },
+  { "id": "cape", "name": "Cape", "bonusMove": 30, "description": "+30 MoveSpeed" }
+]

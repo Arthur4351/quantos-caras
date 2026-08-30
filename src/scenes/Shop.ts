@@ -4,6 +4,7 @@ import { Economy } from '../systems/Economy';
 import { HUD } from '../ui/HUD';
 import { storage } from '../utils/storage';
 import { DudeData } from '../types/DudeData';
+import { RelicSystem } from '../systems/RelicSystem';
 
 export class Shop extends Phaser.Scene {
   shop!: ShopSystem;
@@ -43,6 +44,27 @@ export class Shop extends Phaser.Scene {
     if (this.shop.slots.length === 0) this.shop.rerollFree();
 
     this.add.text(960, 80, 'SHOP - Compre Dudes! (Max 8)', { fontSize: '28px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
+    // Wandering Dude event a cada 10 waves (wave >1)
+    if (this.wave > 1 && this.wave % 10 === 0) {
+      this.add.rectangle(960, 200, 800, 60, 0xf39c12).setStrokeStyle(2, 0xe67e22);
+      this.add.text(960, 200, `✨ WANDERING DUDE! Escolha 1 dude grátis (wave ${this.wave}) ✨`, { fontSize: '16px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
+      const wanderingChoices = this.shop.slots.slice(0,3);
+      wanderingChoices.forEach((wd, idx) => {
+        if (!wd) return;
+        const x = 600 + idx * 360;
+        const y = 260;
+        const bg = this.add.rectangle(x, y, 160, 80, 0xf1c40f).setStrokeStyle(2, 0xf39c12).setInteractive({ useHandCursor: true });
+        this.add.text(x, y, wd.name, { fontSize: '12px', color: '#000', fontStyle: 'bold' }).setOrigin(0.5);
+        this.add.text(x, y+18, 'GRÁTIS', { fontSize: '10px', color: '#27ae60' }).setOrigin(0.5);
+        bg.on('pointerdown', () => {
+          if (this.inventory.length >= 8) { this.showToast('Inventário cheio!'); return; }
+          this.inventory.push(wd);
+          this.shop.slots[this.shop.slots.indexOf(wd)] = null as any;
+          storage.save('save', { wave: this.wave, inventory: this.inventory, gold: this.economy.gold });
+          this.scene.restart({ wave: this.wave, inventory: this.inventory, economy: this.economy });
+        });
+      });
+    }
     this.add.text(960, 120, `Inventário: ${this.inventory.length}/8  |  Clique no dude para comprar, REROLL para novas opções`, { fontSize: '14px', color: '#aaa' }).setOrigin(0.5);
 
     // Shop slots centered responsively (works with FIT scaling, centered at 960)
@@ -72,33 +94,45 @@ export class Shop extends Phaser.Scene {
           this.showToast('Inventário cheio! Max 8');
           return;
         }
-        const bought = this.shop.buy(i, this.economy);
-        if (bought) {
-          this.inventory.push(bought);
-          this.hud.update();
-          storage.save('save', { wave: this.wave, inventory: this.inventory, gold: this.economy.gold });
-          this.scene.restart({ wave: this.wave, inventory: this.inventory, economy: this.economy });
-        } else {
+        // anvil cost reduction: effective cost = max(1, cost - relic reduction)
+        const relicForBuy = new RelicSystem((() => { try { return JSON.parse(localStorage.getItem('relics') || '[]'); } catch { return []; } })());
+        const reduction = relicForBuy.costReduction();
+        const effectiveCost = Math.max(1, (d.cost - reduction));
+        if (this.economy.gold < effectiveCost) {
           this.showToast('Ouro insuficiente!');
           this.cameras.main.shake(100, 0.005);
+          return;
         }
+        // manually spend effectiveCost and give dude (bypass ShopSystem cost check)
+        this.economy.spend(effectiveCost);
+        this.shop.slots[i] = null as any;
+        this.inventory.push(d);
+        this.hud.update();
+        storage.save('save', { wave: this.wave, inventory: this.inventory, gold: this.economy.gold });
+        this.scene.restart({ wave: this.wave, inventory: this.inventory, economy: this.economy });
       });
       bg.on('pointerover', () => bg.setFillStyle(0x34495e));
       bg.on('pointerout', () => bg.setFillStyle(0x2c3e50));
     });
 
     // Reroll button
+    const relicSys = new RelicSystem((() => { try { return JSON.parse(localStorage.getItem('relics') || '[]'); } catch { return []; } })());
+    const rerollCost = relicSys.rerollCost();
+    const rerollLabel = rerollCost === 0 ? 'REROLL (FREE)' : `REROLL (${rerollCost}g)`;
     const rerollBtn = this.add.rectangle(960, 520, 220, 60, 0xe67e22).setStrokeStyle(2, 0xd35400).setInteractive({ useHandCursor: true });
-    const canReroll = this.economy.gold >= 2;
+    const canReroll = this.economy.gold >= rerollCost;
     rerollBtn.setFillStyle(canReroll ? 0xe67e22 : 0x7f8c8d);
-    this.add.text(960, 520, 'REROLL (2g)', { fontSize: '18px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(960, 520, rerollLabel, { fontSize: '18px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
     rerollBtn.on('pointerdown', () => {
-      if (this.shop.reroll(this.economy)) {
-        this.hud.update();
-        this.scene.restart({ wave: this.wave, inventory: this.inventory, economy: this.economy });
-      } else {
+      // use relic-adjusted cost
+      if (this.economy.gold < rerollCost) {
         this.showToast('Sem ouro para reroll!');
+        return;
       }
+      if (rerollCost > 0) this.economy.spend(rerollCost);
+      this.shop.rerollFree();
+      this.hud.update();
+      this.scene.restart({ wave: this.wave, inventory: this.inventory, economy: this.economy });
     });
 
     // Inventory display at bottom

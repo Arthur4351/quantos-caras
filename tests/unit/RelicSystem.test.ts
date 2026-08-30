@@ -30,4 +30,26 @@ describe('RelicSystem', () => {
     rs.add({ id: 'coinpurse' } as any);
     expect(rs.count()).toBe(1);
   });
+  it('sword gives attack bonus', () => {
+    const rs = new RelicSystem([{ id: 'sword' } as any]);
+    expect(rs.attackBonus()).toBeCloseTo(0.15);
+  });
+  it('shield gives defense bonus', () => {
+    const rs = new RelicSystem([{ id: 'shield' } as any]);
+    expect(rs.defenseBonus()).toBeCloseTo(0.20);
+  });
+  it('bomb damage 50 if owned', () => {
+    const rs = new RelicSystem([{ id: 'bomb' } as any]);
+    expect(rs.hasBomb()).toBe(true);
+    expect(rs.bombDamage()).toBe(50);
+  });
+  it('reroll cost 0 with magnet, 1 with dice, 2 default', () => {
+    expect(new RelicSystem([{ id: 'magnet' } as any]).rerollCost()).toBe(0);
+    expect(new RelicSystem([{ id: 'dice' } as any]).rerollCost()).toBe(1);
+    expect(new RelicSystem([]).rerollCost()).toBe(2);
+  });
+  it('crown detection', () => {
+    expect(new RelicSystem([{ id: 'crown' } as any]).hasCrown()).toBe(true);
+    expect(new RelicSystem([]).hasCrown()).toBe(false);
+  });
 });
