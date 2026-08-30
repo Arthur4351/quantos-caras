@@ -18,12 +18,16 @@ export class Shop extends Phaser.Scene {
     this.wave = data.wave ?? 1;
     this.inventory = data.inventory ?? [];
     this.economy = data.economy ?? new Economy(6);
-    // try load from storage if empty
+    // try load from storage if empty (robust, ignore wave mismatch)
     if (this.inventory.length === 0) {
-      const saved = storage.load('save');
-      if (saved && saved.inventory && saved.wave === this.wave) {
-        this.inventory = saved.inventory;
-        if (typeof saved.gold === 'number') this.economy.gold = saved.gold;
+      try {
+        const saved = storage.load('save');
+        if (saved && Array.isArray(saved.inventory) && saved.inventory.length > 0) {
+          this.inventory = saved.inventory;
+          if (typeof saved.gold === 'number' && !isNaN(saved.gold)) this.economy.gold = Math.max(0, saved.gold);
+        }
+      } catch (e) {
+        console.warn('Save load failed, using defaults', e);
       }
     }
   }
@@ -41,8 +45,10 @@ export class Shop extends Phaser.Scene {
     this.add.text(960, 80, 'SHOP - Compre Dudes! (Max 8)', { fontSize: '28px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
     this.add.text(960, 120, `Inventário: ${this.inventory.length}/8  |  Clique no dude para comprar, REROLL para novas opções`, { fontSize: '14px', color: '#aaa' }).setOrigin(0.5);
 
-    // Shop slots (responsive: centered grid)
-    const startX = 400;
+    // Shop slots centered responsively (works with FIT scaling, centered at 960)
+    const slotCount = this.shop.slots.length;
+    const totalW = slotCount * 200 + (slotCount - 1) * 20;
+    const startX = 960 - totalW / 2 + 90;
     const slotY = 320;
     this.shop.slots.forEach((d, i) => {
       const x = startX + i * 220;
@@ -112,23 +118,25 @@ export class Shop extends Phaser.Scene {
         this.add.text(x, invY - 20, d.name.charAt(0), { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
         this.add.text(x, invY + 20, d.name, { fontSize: '11px', color: '#fff' }).setOrigin(0.5);
         this.add.text(x, invY + 36, `${d.stats.hp}HP`, { fontSize: '10px', color: '#aaa' }).setOrigin(0.5);
-        // sell on right click / long press - sell for cost-1
+        const sellBg = this.add.rectangle(x, invY + 52, 60, 18, 0xc0392b).setInteractive({ useHandCursor: true });
+        this.add.text(x, invY + 52, 'VENDER', { fontSize: '9px', color: '#fff' }).setOrigin(0.5);
+        const doSell = () => {
+          const idx = this.inventory.indexOf(d);
+          if (idx !== -1) {
+            this.inventory.splice(idx, 1);
+            this.economy.add(Math.max(1, d.cost - 1));
+            this.hud.update();
+            storage.save('save', { wave: this.wave, inventory: this.inventory, gold: this.economy.gold });
+            this.scene.restart({ wave: this.wave, inventory: this.inventory, economy: this.economy });
+          }
+        };
+        sellBg.on('pointerdown', doSell);
         bg.setInteractive({ useHandCursor: true });
         bg.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-          if (pointer.rightButtonDown()) {
-            // sell
-            const idx = this.inventory.indexOf(d);
-            if (idx !== -1) {
-              this.inventory.splice(idx, 1);
-              this.economy.add(Math.max(1, d.cost - 1));
-              this.hud.update();
-              storage.save('save', { wave: this.wave, inventory: this.inventory, gold: this.economy.gold });
-              this.scene.restart({ wave: this.wave, inventory: this.inventory, economy: this.economy });
-            }
-          }
+          if ((pointer as any).rightButtonDown && (pointer as any).rightButtonDown()) doSell();
         });
       });
-      this.add.text(960, invY + 90, 'Dica: clique direito no dude para vender (recupera cost-1)', { fontSize: '10px', color: '#666' }).setOrigin(0.5);
+      this.add.text(960, invY + 90, 'Dica: VENDER recupera cost-1  •  Toque para vender no mobile', { fontSize: '10px', color: '#666' }).setOrigin(0.5);
     }
 
     // Battle button
@@ -148,9 +156,13 @@ export class Shop extends Phaser.Scene {
     this.add.text(960, 1000, 'PC: clique | Mobile: toque | Mudo: tecla M', { fontSize: '11px', color: '#555' }).setOrigin(0.5);
 
     // Mute toggle via M
-    this.input.keyboard?.on('keydown-M', () => {
+    const shopMuteHandler = () => {
       this.sound.mute = !this.sound.mute;
       this.showToast(this.sound.mute ? 'Mutado' : 'Som ligado');
+    };
+    this.input.keyboard?.on('keydown-M', shopMuteHandler);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.keyboard?.off('keydown-M', shopMuteHandler);
     });
   }
 

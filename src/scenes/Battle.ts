@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { WaveManager } from '../systems/WaveManager';
 import { BattleSystem, calculateDamage } from '../systems/BattleSystem';
-import { calculateSynergyBonus } from '../systems/Synergy';
+import { calculateSynergyBonus, calculateHpBonus } from '../systems/Synergy';
 import { Dude } from '../entities/Dude';
 import { Enemy } from '../entities/Enemy';
 import { RelicSystem } from '../systems/RelicSystem';
@@ -47,6 +47,12 @@ export class Battle extends Phaser.Scene {
       const x = 300 + (i % 4) * 140;
       const y = 280 + Math.floor(i / 4) * 140;
       const dude = new Dude(this, x, y, d);
+      // apply HP synergy bonus from Undead etc.
+      const hpBonus = calculateHpBonus(this.dudesData, d.family);
+      if (hpBonus > 0) {
+        const extra = Math.floor(d.stats.hp * hpBonus);
+        dude.currentHp += extra;
+      }
       // add name label
       const label = this.add.text(x, y + 40, d.name, { fontSize: '12px', color: '#fff' }).setOrigin(0.5);
       (dude as any).label = label;
@@ -89,7 +95,13 @@ export class Battle extends Phaser.Scene {
 
     this.add.text(960, 980, 'Dudes atacam automaticamente o alvo mais próximo', { fontSize: '14px', color: '#aaa' }).setOrigin(0.5);
     // mute toggle
-    this.input.keyboard?.on('keydown-M', () => { this.sound.mute = !this.sound.mute; });
+    const muteHandler = () => { this.sound.mute = !this.sound.mute; };
+    this.input.keyboard?.on('keydown-M', muteHandler);
+    // cleanup listeners on shutdown to prevent leak
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.off('pointerdown');
+      this.input.keyboard?.off('keydown-M', muteHandler);
+    });
 
     this.battleActive = true;
 
@@ -120,10 +132,10 @@ export class Battle extends Phaser.Scene {
       const target = this.battleSystem.findClosest(d as any, this.enemies as any) as Enemy | null;
       if (!target || !target.isAlive()) return;
       const dist = Phaser.Math.Distance.Between(d.x, d.y, target.x, target.y);
-      if (dist < d.data.stats.range) {
+      if (dist < d.dudeData.stats.range) {
         if (d.attackCooldown <= 0) {
-          const synergy = calculateSynergyBonus(this.dudesData, d.data.family);
-          const dmg = calculateDamage(d.data.stats.atk, synergy);
+          const synergy = calculateSynergyBonus(this.dudesData, d.dudeData.family);
+          const dmg = calculateDamage(d.dudeData.stats.atk, synergy);
           target.takeDamage(dmg);
           // update label if exists
           if ((target as any).label) {
@@ -132,13 +144,13 @@ export class Battle extends Phaser.Scene {
           }
           // attack anim
           this.tweens.add({ targets: d, scaleX: 1.2, scaleY: 1.2, duration: 80, yoyo: true });
-          d.attackCooldown = 1000 / d.data.stats.attackSpeed;
+          d.attackCooldown = 1000 / d.dudeData.stats.attackSpeed;
         }
       } else {
         // move towards target slowly
         const angle = Phaser.Math.Angle.Between(d.x, d.y, target.x, target.y);
-        d.x += Math.cos(angle) * d.data.stats.moveSpeed * 0.016 * 0.3;
-        d.y += Math.sin(angle) * d.data.stats.moveSpeed * 0.016 * 0.3;
+        d.x += Math.cos(angle) * d.dudeData.stats.moveSpeed * 0.016 * 0.3;
+        d.y += Math.sin(angle) * d.dudeData.stats.moveSpeed * 0.016 * 0.3;
         if ((d as any).label) (d as any).label.setPosition(d.x, d.y + 40);
       }
     });
@@ -170,7 +182,7 @@ export class Battle extends Phaser.Scene {
     if (result === 'lose' && this.relicSystem.hasRevive() && !this.hasRevived) {
       const dead = this.dudes.find(d => !d.isAlive());
       if (dead) {
-        dead.heal(dead.data.stats.hp * 0.5);
+        dead.heal(dead.dudeData.stats.hp * 0.5);
         this.hasRevived = true;
         this.add.text(dead.x, dead.y - 50, 'REVIVE! +50% HP', { fontSize: '14px', color: '#2ecc71', backgroundColor: '#000' } as any).setOrigin(0.5);
         this.cameras.main.flash(300, 46, 204, 113);

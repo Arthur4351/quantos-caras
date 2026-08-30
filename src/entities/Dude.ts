@@ -2,14 +2,14 @@ import Phaser from 'phaser';
 import { DudeData } from '../types/DudeData';
 
 export class Dude extends Phaser.GameObjects.Sprite {
-  data: DudeData;
+  dudeData: DudeData;
   currentHp: number;
   attackCooldown: number = 0;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, data: DudeData) {
+  constructor(scene: Phaser.Scene, x: number, y: number, dudeData: DudeData) {
     super(scene, x, y, 'missing');
-    this.data = data;
-    this.currentHp = data.stats.hp;
+    this.dudeData = dudeData;
+    this.currentHp = dudeData.stats.hp;
     scene.add.existing(this);
     if (scene.physics && (scene.physics as any).add) {
       scene.physics.add.existing(this);
@@ -50,7 +50,7 @@ export class Dude extends Phaser.GameObjects.Sprite {
   }
 
   heal(amount: number): void {
-    this.currentHp = Math.min(this.data.stats.hp, this.currentHp + amount);
+    this.currentHp = Math.min(this.dudeData.stats.hp, this.currentHp + amount);
     if (this.isAlive()) {
       this.clearTint();
       this.setAlpha(1);

@@ -1,7 +1,10 @@
 import Phaser from 'phaser';
 import { Economy } from '../systems/Economy';
 import { storage } from '../utils/storage';
+import { RelicSystem } from '../systems/RelicSystem';
+import { calculateGoldBonus } from '../systems/Synergy';
 import relics from '../data/relics.json';
+import waves from '../data/waves.json';
 import { RelicData } from '../types/RelicData';
 
 export class Reward extends Phaser.Scene {
@@ -21,7 +24,16 @@ export class Reward extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#1a1a2e');
     this.cameras.main.fadeIn(300);
 
-    const rewardGold = 5 + Math.floor(this.wave / 2);
+    // Use waves.json for base reward, plus bonuses from relics and family synergy
+    const waveEntry = (waves as any).find((w: any) => w.wave === this.wave);
+    let rewardGold = waveEntry ? waveEntry.rewardGold : 5 + Math.floor(this.wave / 2);
+    // add coinpurse relic bonus and family gold synergy
+    try {
+      const savedRelics = storage.load('relics') || [];
+      const rs = new RelicSystem(savedRelics);
+      rewardGold += rs.goldBonus();
+      rewardGold += calculateGoldBonus(this.dudesData);
+    } catch {}
     // load or create economy
     if (!this.economy) {
       const saved = storage.load('save');

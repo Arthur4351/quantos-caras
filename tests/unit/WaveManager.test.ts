@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+vi.mock('../../src/entities/Enemy', () => ({ Enemy: class MockEnemy { isAlive() { return true; } takeDamage() {} } }));
 import { WaveManager } from '../../src/systems/WaveManager';
 import waves from '../../src/data/waves.json';
 

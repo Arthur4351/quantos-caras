@@ -1,4 +1,5 @@
 import { WaveData } from '../types/WaveData';
+import { Enemy } from '../entities/Enemy';
 
 export class WaveManager {
   constructor(private waves: WaveData[]) {}
@@ -8,11 +9,9 @@ export class WaveManager {
     return found || this.waves[0];
   }
 
-  spawn(scene: Phaser.Scene, wave: number): any[] {
+  spawn(scene: Phaser.Scene, wave: number): Enemy[] {
     const data = this.getWave(wave);
-    const enemies: any[] = [];
-    // lazy import to avoid Phaser canvas init during unit tests
-    const { Enemy } = require('../entities/Enemy');
+    const enemies: Enemy[] = [];
     data.enemies.forEach((e: any) => {
       for (let i = 0; i < e.count; i++) {
         const x = 1200 + Math.random() * 500;
