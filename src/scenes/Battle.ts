@@ -4,6 +4,7 @@ import { BattleSystem, calculateDamage } from '../systems/BattleSystem';
 import { calculateSynergyBonus, calculateHpBonus } from '../systems/Synergy';
 import { Dude } from '../entities/Dude';
 import { Enemy } from '../entities/Enemy';
+import { Projectile } from '../entities/Projectile';
 import { RelicSystem } from '../systems/RelicSystem';
 import { storage } from '../utils/storage';
 import waves from '../data/waves.json';
@@ -20,6 +21,7 @@ export class Battle extends Phaser.Scene {
   battleActive = false;
   resultText?: Phaser.GameObjects.Text;
   hasRevived = false;
+  projectiles: Projectile[] = [];
 
   constructor() { super('Battle'); }
 
@@ -105,6 +107,16 @@ export class Battle extends Phaser.Scene {
 
     this.battleActive = true;
 
+    // projectile update loop 16ms
+    this.time.addEvent({
+      delay: 16,
+      loop: true,
+      callback: () => {
+        this.projectiles.forEach(pr => { if (pr.active) pr.update(); });
+        this.projectiles = this.projectiles.filter(pr => pr.active);
+      }
+    });
+
     // auto battle loop every 120ms
     this.time.addEvent({
       delay: 120,
@@ -127,7 +139,7 @@ export class Battle extends Phaser.Scene {
   tick() {
     if (!this.battleActive) return;
 
-    // Dudes attack
+    // Dudes attack (ranged uses Projectile if range>100)
     this.dudes.filter(d => d.isAlive()).forEach(d => {
       const target = this.battleSystem.findClosest(d as any, this.enemies as any) as Enemy | null;
       if (!target || !target.isAlive()) return;
@@ -135,12 +147,19 @@ export class Battle extends Phaser.Scene {
       if (dist < d.dudeData.stats.range) {
         if (d.attackCooldown <= 0) {
           const synergy = calculateSynergyBonus(this.dudesData, d.dudeData.family);
-          const dmg = calculateDamage(d.dudeData.stats.atk, synergy);
-          target.takeDamage(dmg);
-          // update label if exists
-          if ((target as any).label) {
-            (target as any).label.setText(`${target.type} ${Math.max(0, Math.floor(target.currentHp))}hp`);
-            (target as any).label.setPosition(target.x, target.y - 28);
+          let dmg = calculateDamage(d.dudeData.stats.atk, synergy);
+          // trinket bonus already handled via stats? check via storage? keep simple
+          // relic sword bonus
+          dmg = dmg * (1 + this.relicSystem.attackBonus());
+          if (d.dudeData.stats.range > 100) {
+            const proj = new Projectile(this, d.x, d.y, target as any, dmg);
+            this.projectiles.push(proj);
+          } else {
+            target.takeDamage(dmg);
+            if ((target as any).label) {
+              (target as any).label.setText(`${target.type} ${Math.max(0, Math.floor(target.currentHp))}hp`);
+              (target as any).label.setPosition(target.x, target.y - 28);
+            }
           }
           // attack anim
           this.tweens.add({ targets: d, scaleX: 1.2, scaleY: 1.2, duration: 80, yoyo: true });
@@ -213,5 +232,7 @@ export class Battle extends Phaser.Scene {
     [...this.dudes, ...this.enemies].forEach((e: any) => {
       if (e.label) e.label.destroy();
     });
+    this.projectiles.forEach(pr => pr.destroy());
+    this.projectiles = [];
   }
 }
