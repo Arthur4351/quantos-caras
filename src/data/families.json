@@ -1,7 +1,8 @@
 {
-  "Warrior": { "color": "#c0392b", "synergy": [{ "count": 2, "bonusAtk": 0.15 }] },
-  "Undead": { "color": "#27ae60", "synergy": [{ "count": 2, "bonusHp": 0.2 }] },
-  "Employed": { "color": "#2980b9", "synergy": [{ "count": 2, "bonusGold": 1 }] },
-  "Fantasy": { "color": "#8e44ad", "synergy": [{ "count": 2, "bonusAtk": 0.2 }] },
-  "SciFi": { "color": "#16a085", "synergy": [{ "count": 2, "bonusAtk": 0.15 }] }
+  "Warrior": { "color": "#c0392b", "synergy": [{ "count": 2, "bonusAtk": 0.15 }, { "count": 4, "bonusAtk": 0.30 }, { "count": 6, "bonusAtk": 0.50 }] },
+  "Undead": { "color": "#27ae60", "synergy": [{ "count": 2, "bonusHp": 0.20 }, { "count": 4, "bonusHp": 0.35 }, { "count": 6, "bonusHp": 0.50, "regen": 2 }] },
+  "Employed": { "color": "#2980b9", "synergy": [{ "count": 2, "bonusGold": 1 }, { "count": 4, "bonusGold": 2 }, { "count": 6, "bonusGold": 3 }] },
+  "Fantasy": { "color": "#8e44ad", "synergy": [{ "count": 2, "bonusAtk": 0.20 }, { "count": 4, "bonusAtk": 0.35, "crit": 0.10 }, { "count": 6, "bonusAtk": 0.50 }] },
+  "SciFi": { "color": "#16a085", "synergy": [{ "count": 2, "bonusAtk": 0.15, "bonusAS": 0.10 }, { "count": 4, "bonusAtk": 0.30 }, { "count": 6, "bonusAtk": 0.50 }] },
+  "Action": { "color": "#d35400", "synergy": [{ "count": 2, "bonusAtk": 0.10, "bonusHp": 0.10 }, { "count": 4, "bonusAtk": 0.20, "bonusHp": 0.20 }, { "count": 6, "bonusAtk": 0.35, "bonusHp": 0.35 }] }
 }

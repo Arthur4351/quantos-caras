@@ -1,7 +1,842 @@
 [
-  { "id": "knight", "name": "Knight", "family": "Warrior", "role": "Tank", "stats": { "hp": 120, "atk": 18, "range": 60, "attackSpeed": 0.9, "moveSpeed": 80 }, "ability": { "type": "shieldBlock", "value": 0.2 }, "cost": 3, "sprite": "knight", "rarity": "common" },
-  { "id": "zombie", "name": "Zombie", "family": "Undead", "role": "Tank", "stats": { "hp": 100, "atk": 14, "range": 50, "attackSpeed": 0.7, "moveSpeed": 60 }, "ability": { "type": "regen", "value": 2 }, "cost": 2, "sprite": "zombie", "rarity": "common" },
-  { "id": "office", "name": "Office Guy", "family": "Employed", "role": "Support", "stats": { "hp": 80, "atk": 10, "range": 120, "attackSpeed": 1.1, "moveSpeed": 90 }, "ability": { "type": "goldBonus", "value": 1 }, "cost": 3, "sprite": "office", "rarity": "common" },
-  { "id": "wizard", "name": "Wizard", "family": "Fantasy", "role": "DPS", "stats": { "hp": 70, "atk": 25, "range": 180, "attackSpeed": 0.8, "moveSpeed": 75 }, "ability": { "type": "aoe", "value": 10 }, "cost": 4, "sprite": "wizard", "rarity": "rare" },
-  { "id": "astro", "name": "Astro", "family": "SciFi", "role": "DPS", "stats": { "hp": 75, "atk": 22, "range": 200, "attackSpeed": 1.3, "moveSpeed": 85 }, "ability": { "type": "crit", "value": 0.15 }, "cost": 4, "sprite": "astro", "rarity": "rare" }
+  {
+    "id": "knight",
+    "name": "Knight",
+    "family": "Warrior",
+    "role": "Tank",
+    "stats": {
+      "hp": 120,
+      "atk": 18,
+      "range": 60,
+      "attackSpeed": 0.9,
+      "moveSpeed": 80
+    },
+    "ability": {
+      "type": "shieldBlock",
+      "value": 0.2
+    },
+    "cost": 3,
+    "sprite": "knight",
+    "rarity": "common"
+  },
+  {
+    "id": "zombie",
+    "name": "Zombie",
+    "family": "Undead",
+    "role": "Tank",
+    "stats": {
+      "hp": 100,
+      "atk": 14,
+      "range": 50,
+      "attackSpeed": 0.7,
+      "moveSpeed": 60
+    },
+    "ability": {
+      "type": "regen",
+      "value": 2
+    },
+    "cost": 2,
+    "sprite": "zombie",
+    "rarity": "common"
+  },
+  {
+    "id": "office",
+    "name": "Office Guy",
+    "family": "Employed",
+    "role": "Support",
+    "stats": {
+      "hp": 80,
+      "atk": 10,
+      "range": 120,
+      "attackSpeed": 1.1,
+      "moveSpeed": 90
+    },
+    "ability": {
+      "type": "goldBonus",
+      "value": 1
+    },
+    "cost": 3,
+    "sprite": "office",
+    "rarity": "common"
+  },
+  {
+    "id": "wizard",
+    "name": "Wizard",
+    "family": "Fantasy",
+    "role": "DPS",
+    "stats": {
+      "hp": 70,
+      "atk": 25,
+      "range": 180,
+      "attackSpeed": 0.8,
+      "moveSpeed": 75
+    },
+    "ability": {
+      "type": "aoe",
+      "value": 10
+    },
+    "cost": 4,
+    "sprite": "wizard",
+    "rarity": "rare"
+  },
+  {
+    "id": "astro",
+    "name": "Astro",
+    "family": "SciFi",
+    "role": "DPS",
+    "stats": {
+      "hp": 75,
+      "atk": 22,
+      "range": 200,
+      "attackSpeed": 1.3,
+      "moveSpeed": 85
+    },
+    "ability": {
+      "type": "crit",
+      "value": 0.15
+    },
+    "cost": 4,
+    "sprite": "astro",
+    "rarity": "rare"
+  },
+  {
+    "id": "barbarian",
+    "name": "Barbarian",
+    "family": "Warrior",
+    "role": "Tank",
+    "stats": {
+      "hp": 140,
+      "atk": 20,
+      "range": 60,
+      "attackSpeed": 0.8,
+      "moveSpeed": 75
+    },
+    "ability": {
+      "type": "enrage",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "barbarian",
+    "rarity": "rare"
+  },
+  {
+    "id": "samurai",
+    "name": "Samurai",
+    "family": "Warrior",
+    "role": "DPS",
+    "stats": {
+      "hp": 115,
+      "atk": 22,
+      "range": 65,
+      "attackSpeed": 1.0,
+      "moveSpeed": 80
+    },
+    "ability": {
+      "type": "enrage",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "samurai",
+    "rarity": "rare"
+  },
+  {
+    "id": "viking",
+    "name": "Viking",
+    "family": "Warrior",
+    "role": "Tank",
+    "stats": {
+      "hp": 130,
+      "atk": 18,
+      "range": 60,
+      "attackSpeed": 0.85,
+      "moveSpeed": 70
+    },
+    "ability": {
+      "type": "enrage",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "viking",
+    "rarity": "rare"
+  },
+  {
+    "id": "gladiator",
+    "name": "Gladiator",
+    "family": "Warrior",
+    "role": "Tank",
+    "stats": {
+      "hp": 125,
+      "atk": 19,
+      "range": 55,
+      "attackSpeed": 0.9,
+      "moveSpeed": 75
+    },
+    "ability": {
+      "type": "enrage",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "gladiator",
+    "rarity": "rare"
+  },
+  {
+    "id": "monk",
+    "name": "Monk",
+    "family": "Warrior",
+    "role": "DPS",
+    "stats": {
+      "hp": 100,
+      "atk": 24,
+      "range": 60,
+      "attackSpeed": 1.1,
+      "moveSpeed": 85
+    },
+    "ability": {
+      "type": "enrage",
+      "value": 0.15
+    },
+    "cost": 4,
+    "sprite": "monk",
+    "rarity": "epic"
+  },
+  {
+    "id": "warlord",
+    "name": "Warlord",
+    "family": "Warrior",
+    "role": "Tank",
+    "stats": {
+      "hp": 160,
+      "atk": 26,
+      "range": 65,
+      "attackSpeed": 0.75,
+      "moveSpeed": 70
+    },
+    "ability": {
+      "type": "enrage",
+      "value": 0.15
+    },
+    "cost": 5,
+    "sprite": "warlord",
+    "rarity": "legendary"
+  },
+  {
+    "id": "skeleton",
+    "name": "Skeleton",
+    "family": "Undead",
+    "role": "Support",
+    "stats": {
+      "hp": 90,
+      "atk": 16,
+      "range": 55,
+      "attackSpeed": 0.85,
+      "moveSpeed": 70
+    },
+    "ability": {
+      "type": "regen",
+      "value": 2
+    },
+    "cost": 2,
+    "sprite": "skeleton",
+    "rarity": "common"
+  },
+  {
+    "id": "ghost",
+    "name": "Ghost",
+    "family": "Undead",
+    "role": "Support",
+    "stats": {
+      "hp": 80,
+      "atk": 14,
+      "range": 70,
+      "attackSpeed": 1.0,
+      "moveSpeed": 90
+    },
+    "ability": {
+      "type": "regen",
+      "value": 2
+    },
+    "cost": 2,
+    "sprite": "ghost",
+    "rarity": "common"
+  },
+  {
+    "id": "vampire",
+    "name": "Vampire",
+    "family": "Undead",
+    "role": "Support",
+    "stats": {
+      "hp": 110,
+      "atk": 18,
+      "range": 55,
+      "attackSpeed": 0.9,
+      "moveSpeed": 80
+    },
+    "ability": {
+      "type": "regen",
+      "value": 2
+    },
+    "cost": 3,
+    "sprite": "vampire",
+    "rarity": "rare"
+  },
+  {
+    "id": "lich",
+    "name": "Lich",
+    "family": "Undead",
+    "role": "DPS",
+    "stats": {
+      "hp": 85,
+      "atk": 22,
+      "range": 130,
+      "attackSpeed": 0.8,
+      "moveSpeed": 75
+    },
+    "ability": {
+      "type": "regen",
+      "value": 2
+    },
+    "cost": 4,
+    "sprite": "lich",
+    "rarity": "epic"
+  },
+  {
+    "id": "mummy",
+    "name": "Mummy",
+    "family": "Undead",
+    "role": "Tank",
+    "stats": {
+      "hp": 120,
+      "atk": 15,
+      "range": 50,
+      "attackSpeed": 0.7,
+      "moveSpeed": 60
+    },
+    "ability": {
+      "type": "regen",
+      "value": 2
+    },
+    "cost": 3,
+    "sprite": "mummy",
+    "rarity": "rare"
+  },
+  {
+    "id": "boneknight",
+    "name": "Bone Knight",
+    "family": "Undead",
+    "role": "Tank",
+    "stats": {
+      "hp": 135,
+      "atk": 20,
+      "range": 60,
+      "attackSpeed": 0.8,
+      "moveSpeed": 70
+    },
+    "ability": {
+      "type": "regen",
+      "value": 2
+    },
+    "cost": 4,
+    "sprite": "boneknight",
+    "rarity": "epic"
+  },
+  {
+    "id": "barista",
+    "name": "Barista",
+    "family": "Employed",
+    "role": "Support",
+    "stats": {
+      "hp": 85,
+      "atk": 12,
+      "range": 80,
+      "attackSpeed": 1.0,
+      "moveSpeed": 85
+    },
+    "ability": {
+      "type": "goldBonus",
+      "value": 0.15
+    },
+    "cost": 2,
+    "sprite": "barista",
+    "rarity": "common"
+  },
+  {
+    "id": "cashier",
+    "name": "Cashier",
+    "family": "Employed",
+    "role": "Support",
+    "stats": {
+      "hp": 80,
+      "atk": 11,
+      "range": 90,
+      "attackSpeed": 1.1,
+      "moveSpeed": 90
+    },
+    "ability": {
+      "type": "goldBonus",
+      "value": 0.15
+    },
+    "cost": 2,
+    "sprite": "cashier",
+    "rarity": "common"
+  },
+  {
+    "id": "manager",
+    "name": "Manager",
+    "family": "Employed",
+    "role": "Support",
+    "stats": {
+      "hp": 95,
+      "atk": 14,
+      "range": 100,
+      "attackSpeed": 0.9,
+      "moveSpeed": 80
+    },
+    "ability": {
+      "type": "goldBonus",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "manager",
+    "rarity": "rare"
+  },
+  {
+    "id": "intern",
+    "name": "Intern",
+    "family": "Employed",
+    "role": "Support",
+    "stats": {
+      "hp": 70,
+      "atk": 9,
+      "range": 85,
+      "attackSpeed": 1.2,
+      "moveSpeed": 95
+    },
+    "ability": {
+      "type": "goldBonus",
+      "value": 0.15
+    },
+    "cost": 1,
+    "sprite": "intern",
+    "rarity": "common"
+  },
+  {
+    "id": "courier",
+    "name": "Courier",
+    "family": "Employed",
+    "role": "Support",
+    "stats": {
+      "hp": 90,
+      "atk": 13,
+      "range": 75,
+      "attackSpeed": 1.0,
+      "moveSpeed": 100
+    },
+    "ability": {
+      "type": "goldBonus",
+      "value": 0.15
+    },
+    "cost": 2,
+    "sprite": "courier",
+    "rarity": "common"
+  },
+  {
+    "id": "ceo",
+    "name": "CEO",
+    "family": "Employed",
+    "role": "DPS",
+    "stats": {
+      "hp": 100,
+      "atk": 20,
+      "range": 90,
+      "attackSpeed": 0.9,
+      "moveSpeed": 80
+    },
+    "ability": {
+      "type": "goldBonus",
+      "value": 0.15
+    },
+    "cost": 4,
+    "sprite": "ceo",
+    "rarity": "epic"
+  },
+  {
+    "id": "elf",
+    "name": "Elf",
+    "family": "Fantasy",
+    "role": "DPS",
+    "stats": {
+      "hp": 75,
+      "atk": 20,
+      "range": 150,
+      "attackSpeed": 1.0,
+      "moveSpeed": 85
+    },
+    "ability": {
+      "type": "aoe",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "elf",
+    "rarity": "rare"
+  },
+  {
+    "id": "druid",
+    "name": "Druid",
+    "family": "Fantasy",
+    "role": "Support",
+    "stats": {
+      "hp": 90,
+      "atk": 18,
+      "range": 120,
+      "attackSpeed": 0.9,
+      "moveSpeed": 80
+    },
+    "ability": {
+      "type": "aoe",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "druid",
+    "rarity": "rare"
+  },
+  {
+    "id": "bard",
+    "name": "Bard",
+    "family": "Fantasy",
+    "role": "Support",
+    "stats": {
+      "hp": 80,
+      "atk": 16,
+      "range": 110,
+      "attackSpeed": 1.1,
+      "moveSpeed": 85
+    },
+    "ability": {
+      "type": "aoe",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "bard",
+    "rarity": "rare"
+  },
+  {
+    "id": "paladin",
+    "name": "Paladin",
+    "family": "Fantasy",
+    "role": "Tank",
+    "stats": {
+      "hp": 130,
+      "atk": 18,
+      "range": 60,
+      "attackSpeed": 0.8,
+      "moveSpeed": 75
+    },
+    "ability": {
+      "type": "aoe",
+      "value": 0.15
+    },
+    "cost": 4,
+    "sprite": "paladin",
+    "rarity": "epic"
+  },
+  {
+    "id": "necro",
+    "name": "Necro",
+    "family": "Fantasy",
+    "role": "DPS",
+    "stats": {
+      "hp": 80,
+      "atk": 22,
+      "range": 140,
+      "attackSpeed": 0.85,
+      "moveSpeed": 75
+    },
+    "ability": {
+      "type": "aoe",
+      "value": 0.15
+    },
+    "cost": 4,
+    "sprite": "necro",
+    "rarity": "epic"
+  },
+  {
+    "id": "dragon",
+    "name": "Dragon",
+    "family": "Fantasy",
+    "role": "Tank",
+    "stats": {
+      "hp": 150,
+      "atk": 28,
+      "range": 80,
+      "attackSpeed": 0.7,
+      "moveSpeed": 70
+    },
+    "ability": {
+      "type": "aoe",
+      "value": 0.15
+    },
+    "cost": 5,
+    "sprite": "dragon",
+    "rarity": "legendary"
+  },
+  {
+    "id": "robot",
+    "name": "Robot",
+    "family": "SciFi",
+    "role": "Support",
+    "stats": {
+      "hp": 110,
+      "atk": 18,
+      "range": 70,
+      "attackSpeed": 0.9,
+      "moveSpeed": 75
+    },
+    "ability": {
+      "type": "crit",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "robot",
+    "rarity": "rare"
+  },
+  {
+    "id": "cyborg",
+    "name": "Cyborg",
+    "family": "SciFi",
+    "role": "DPS",
+    "stats": {
+      "hp": 105,
+      "atk": 20,
+      "range": 75,
+      "attackSpeed": 1.0,
+      "moveSpeed": 80
+    },
+    "ability": {
+      "type": "crit",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "cyborg",
+    "rarity": "rare"
+  },
+  {
+    "id": "alien",
+    "name": "Alien",
+    "family": "SciFi",
+    "role": "Support",
+    "stats": {
+      "hp": 85,
+      "atk": 19,
+      "range": 130,
+      "attackSpeed": 1.1,
+      "moveSpeed": 85
+    },
+    "ability": {
+      "type": "crit",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "alien",
+    "rarity": "rare"
+  },
+  {
+    "id": "mech",
+    "name": "Mech",
+    "family": "SciFi",
+    "role": "Tank",
+    "stats": {
+      "hp": 140,
+      "atk": 22,
+      "range": 65,
+      "attackSpeed": 0.8,
+      "moveSpeed": 70
+    },
+    "ability": {
+      "type": "crit",
+      "value": 0.15
+    },
+    "cost": 4,
+    "sprite": "mech",
+    "rarity": "epic"
+  },
+  {
+    "id": "hacker",
+    "name": "Hacker",
+    "family": "SciFi",
+    "role": "Support",
+    "stats": {
+      "hp": 75,
+      "atk": 17,
+      "range": 140,
+      "attackSpeed": 1.2,
+      "moveSpeed": 90
+    },
+    "ability": {
+      "type": "crit",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "hacker",
+    "rarity": "rare"
+  },
+  {
+    "id": "starlord",
+    "name": "Star Lord",
+    "family": "SciFi",
+    "role": "DPS",
+    "stats": {
+      "hp": 95,
+      "atk": 21,
+      "range": 110,
+      "attackSpeed": 1.0,
+      "moveSpeed": 88
+    },
+    "ability": {
+      "type": "crit",
+      "value": 0.15
+    },
+    "cost": 4,
+    "sprite": "starlord",
+    "rarity": "epic"
+  },
+  {
+    "id": "ninja",
+    "name": "Ninja",
+    "family": "Action",
+    "role": "DPS",
+    "stats": {
+      "hp": 90,
+      "atk": 20,
+      "range": 60,
+      "attackSpeed": 1.3,
+      "moveSpeed": 95
+    },
+    "ability": {
+      "type": "balanced",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "ninja",
+    "rarity": "rare"
+  },
+  {
+    "id": "pirate",
+    "name": "Pirate",
+    "family": "Action",
+    "role": "Support",
+    "stats": {
+      "hp": 110,
+      "atk": 18,
+      "range": 70,
+      "attackSpeed": 0.9,
+      "moveSpeed": 80
+    },
+    "ability": {
+      "type": "balanced",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "pirate",
+    "rarity": "rare"
+  },
+  {
+    "id": "cowboy",
+    "name": "Cowboy",
+    "family": "Action",
+    "role": "DPS",
+    "stats": {
+      "hp": 95,
+      "atk": 21,
+      "range": 150,
+      "attackSpeed": 0.9,
+      "moveSpeed": 85
+    },
+    "ability": {
+      "type": "balanced",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "cowboy",
+    "rarity": "rare"
+  },
+  {
+    "id": "spy",
+    "name": "Spy",
+    "family": "Action",
+    "role": "Support",
+    "stats": {
+      "hp": 85,
+      "atk": 19,
+      "range": 90,
+      "attackSpeed": 1.1,
+      "moveSpeed": 90
+    },
+    "ability": {
+      "type": "balanced",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "spy",
+    "rarity": "rare"
+  },
+  {
+    "id": "athlete",
+    "name": "Athlete",
+    "family": "Action",
+    "role": "Tank",
+    "stats": {
+      "hp": 120,
+      "atk": 16,
+      "range": 60,
+      "attackSpeed": 1.2,
+      "moveSpeed": 100
+    },
+    "ability": {
+      "type": "balanced",
+      "value": 0.15
+    },
+    "cost": 3,
+    "sprite": "athlete",
+    "rarity": "rare"
+  },
+  {
+    "id": "chef",
+    "name": "Chef",
+    "family": "Action",
+    "role": "Support",
+    "stats": {
+      "hp": 100,
+      "atk": 15,
+      "range": 55,
+      "attackSpeed": 1.0,
+      "moveSpeed": 80
+    },
+    "ability": {
+      "type": "balanced",
+      "value": 0.15
+    },
+    "cost": 2,
+    "sprite": "chef",
+    "rarity": "common"
+  },
+  {
+    "id": "dude",
+    "name": "Dude",
+    "family": "Action",
+    "role": "Support",
+    "stats": {
+      "hp": 80,
+      "atk": 12,
+      "range": 60,
+      "attackSpeed": 1.0,
+      "moveSpeed": 85
+    },
+    "ability": {
+      "type": "balanced",
+      "value": 0.15
+    },
+    "cost": 1,
+    "sprite": "dude",
+    "rarity": "common"
+  }
 ]
