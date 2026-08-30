@@ -41,6 +41,17 @@ export class GameOver extends Phaser.Scene {
     const btn = this.add.rectangle(960, 620, 320, 80, 0x3498db).setStrokeStyle(4, 0x2980b9).setInteractive({ useHandCursor: true });
     this.add.text(960, 620, 'JOGAR NOVAMENTE ↻', { fontSize: '22px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
     btn.on('pointerdown', () => {
+      // save daily board if daily active
+      try {
+        const isDaily = JSON.parse(localStorage.getItem('daily_active') || 'false');
+        if (isDaily) {
+          const board = JSON.parse(localStorage.getItem('daily_board') || '[]');
+          board.push({ wave: this.wave, date: new Date().toISOString().slice(0,10), victory: this.victory });
+          board.sort((a:any,b:any)=> b.wave - a.wave);
+          localStorage.setItem('daily_board', JSON.stringify(board.slice(0,10)));
+          localStorage.removeItem('daily_active');
+        }
+      } catch {}
       storage.clear('save');
       storage.clear('relics');
       this.cameras.main.fadeOut(300, 0, 0, 0);

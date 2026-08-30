@@ -18,6 +18,7 @@ export class Menu extends Phaser.Scene {
     btn.on('pointerover', () => { btn.setFillStyle(0x2980b9); txt.setScale(1.05); });
     btn.on('pointerout', () => { btn.setFillStyle(0x3498db); txt.setScale(1); });
     btn.on('pointerdown', () => {
+      try { localStorage.removeItem('daily_active'); localStorage.removeItem('daily_pool'); } catch {}
       this.cameras.main.fadeOut(300, 0, 0, 0);
       this.time.delayedCall(300, () => this.scene.start('Shop', { wave: 1 }));
     });
@@ -25,9 +26,19 @@ export class Menu extends Phaser.Scene {
     // pulse
     this.tweens.add({ targets: btn, scaleX: 1.03, scaleY: 1.03, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
+    // Daily Dude button
+    const dailyBtn = this.add.rectangle(960, 700, 260, 55, 0xf1c40f).setStrokeStyle(3, 0xf39c12).setInteractive({ useHandCursor: true });
+    const dailyTxt = this.add.text(960, 700, 'DAILY DUDE ★', { fontSize: '18px', color: '#000', fontStyle: 'bold' }).setOrigin(0.5);
+    dailyBtn.on('pointerover', () => dailyBtn.setFillStyle(0xf39c12));
+    dailyBtn.on('pointerout', () => dailyBtn.setFillStyle(0xf1c40f));
+    dailyBtn.on('pointerdown', () => {
+      this.cameras.main.fadeOut(300, 0, 0, 0);
+      this.time.delayedCall(300, () => this.scene.start('DailyDude'));
+    });
+
     // Info
-    this.add.text(960, 730, 'PC: drag & drop  •  Mobile: toque para comprar/posicionar  •  M para mute', { fontSize: '13px', color: '#666' }).setOrigin(0.5);
-    this.add.text(960, 760, '5 dudes iniciais • 10 waves • 3 relíquias • Sinergia de famílias', { fontSize: '13px', color: '#555' }).setOrigin(0.5);
+    this.add.text(960, 760, 'PC: drag & drop  •  Mobile: toque para comprar/posicionar  •  M para mute', { fontSize: '13px', color: '#666' }).setOrigin(0.5);
+    this.add.text(960, 790, '42 dudes • 100 waves • 15 relics • 10 trinkets • 6 famílias 2/4/6', { fontSize: '13px', color: '#555' }).setOrigin(0.5);
     this.add.text(960, 1000, 'Butterscotch Shenanigans • Clone fiel web • Phaser 3 + Vite', { fontSize: '11px', color: '#444' }).setOrigin(0.5);
 
     // Dudes preview

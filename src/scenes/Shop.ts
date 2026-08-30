@@ -40,6 +40,14 @@ export class Shop extends Phaser.Scene {
     this.hud = new HUD(this, this.economy, this.wave);
 
     if (!this.shop) this.shop = new ShopSystem();
+    // Daily mode: se daily_active, usar pool diario
+    try {
+      const isDaily = JSON.parse(localStorage.getItem('daily_active') || 'false');
+      const dailyPool = JSON.parse(localStorage.getItem('daily_pool') || 'null');
+      if (isDaily && dailyPool && Array.isArray(dailyPool) && this.wave === 1) {
+        this.shop.slots = dailyPool.slice(0,5);
+      }
+    } catch {}
     // if slots empty refill
     if (this.shop.slots.length === 0) this.shop.rerollFree();
 
