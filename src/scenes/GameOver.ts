@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { storage } from '../utils/storage';
+import { AchievementSystem } from '../systems/AchievementSystem';
 
 export class GameOver extends Phaser.Scene {
   wave!: number;
@@ -36,6 +37,19 @@ export class GameOver extends Phaser.Scene {
     if (relics.length) {
       this.add.text(960, 540, `Relíquias coletadas: ${relics.map((r: any) => r.name).join(', ')}`, { fontSize: '12px', color: '#8e44ad' }).setOrigin(0.5);
     }
+    // Achievements
+    const ac = new AchievementSystem();
+    const unlocked = ac.allData();
+    if (unlocked.length) {
+      this.add.text(960, 570, `Conquistas: ${unlocked.map(a=> a.name).join(' • ')}`, { fontSize: '11px', color: '#f1c40f', wordWrap: { width: 1400 } } as any).setOrigin(0.5);
+    }
+    // Stars
+    try {
+      const stars = JSON.parse(localStorage.getItem('stars') || '{}');
+      const starCount = Object.keys(stars).length;
+      const goldCount = Object.values(stars).filter((s:any)=> s.gold).length;
+      this.add.text(960, 595, `Stars: ${starCount} Silver, ${goldCount} Gold`, { fontSize: '11px', color: '#aaa' }).setOrigin(0.5);
+    } catch {}
 
     // Play again
     const btn = this.add.rectangle(960, 620, 320, 80, 0x3498db).setStrokeStyle(4, 0x2980b9).setInteractive({ useHandCursor: true });

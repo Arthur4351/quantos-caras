@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import { Economy } from '../systems/Economy';
 import { storage } from '../utils/storage';
 import { RelicSystem } from '../systems/RelicSystem';
-import { calculateGoldBonus } from '../systems/Synergy';
+import { calculateGoldBonus, calculateSynergyBonus } from '../systems/Synergy';
+import { AchievementSystem } from '../systems/AchievementSystem';
 import relics from '../data/relics.json';
 import waves from '../data/waves.json';
 import { RelicData } from '../types/RelicData';
@@ -45,6 +46,25 @@ export class Reward extends Phaser.Scene {
     this.add.text(960, 260, `WAVE ${this.wave} COMPLETA!`, { fontSize: '40px', color: '#2ecc71', fontStyle: 'bold' }).setOrigin(0.5);
     this.add.text(960, 320, `+${rewardGold} ouro!  (Total: ${this.economy.gold}g)`, { fontSize: '22px', color: '#ffd700' }).setOrigin(0.5);
 
+    // Save stars: silver for win, gold if no dude lost (check if all dudes alive - we consider victory without death as gold)
+    try {
+      const stars = JSON.parse(localStorage.getItem('stars') || '{}');
+      const prev = stars[this.wave] || {};
+      const noDeath = true; // for now assume gold if win; Battle could pass flag
+      stars[this.wave] = { silver: true, gold: prev.gold || noDeath };
+      localStorage.setItem('stars', JSON.stringify(stars));
+      // achievements
+      const ac = new AchievementSystem();
+      const relics = JSON.parse(localStorage.getItem('relics') || '[]');
+      // calc max synergy in team
+      let maxSyn = 0;
+      const fams = ['Warrior','Undead','Employed','Fantasy','SciFi','Action'];
+      for (const f of fams) {
+        const cnt = this.dudesData.filter((d:any)=> d.family===f).length;
+        if (cnt > maxSyn) maxSyn = cnt;
+      }
+      ac.check({ wave: this.wave, victory: true, noDeath, dudesCollected: this.dudesData.length, relicsCollected: relics.length, synergyMax: maxSyn });
+    } catch {}
     // Save progress
     storage.save('save', { wave: this.wave + 1, inventory: this.dudesData, gold: this.economy.gold });
     // also save relics if any
