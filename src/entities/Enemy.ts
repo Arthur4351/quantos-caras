@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { enemyKey, ENEMY_ORIGIN, ENEMY_SIZE } from '../art/textures';
 
 export class Enemy extends Phaser.GameObjects.Sprite {
   currentHp: number;
@@ -7,7 +8,7 @@ export class Enemy extends Phaser.GameObjects.Sprite {
   type: string;
 
   constructor(scene: Phaser.Scene, x: number, y: number, hp: number, atk: number, type = 'toddler') {
-    super(scene, x, y, 'missing');
+    super(scene, x, y, scene.textures.exists(enemyKey(type)) ? enemyKey(type) : 'missing');
     this.currentHp = hp;
     this.maxHp = hp;
     this.atk = atk;
@@ -16,7 +17,10 @@ export class Enemy extends Phaser.GameObjects.Sprite {
     if (scene.physics && (scene.physics as any).add) {
       scene.physics.add.existing(this);
     }
-    this.setDisplaySize(48, 48);
+    const artSize = ENEMY_SIZE[type];
+    const desiredHeight = type === 'gorilla' || type === 'god' ? 210 : type === 'wolf' ? 112 : 78;
+    this.setScale(artSize ? desiredHeight / artSize.h : 0.72);
+    this.setOrigin(0.5, artSize ? ENEMY_ORIGIN[type] : 0.94);
     this.setTint(0xff4444);
     this.setOrigin(0.5);
   }

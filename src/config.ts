@@ -12,8 +12,9 @@ export const phaserConfig: Phaser.Types.Core.GameConfig = {
   width: 1920,
   height: 1080,
   parent: 'game',
-  backgroundColor: '#1a1a2e',
+  backgroundColor: '#7ed1f5',
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+  render: { pixelArt: false, antialias: true, roundPixels: false },
   physics: { default: 'arcade', arcade: { debug: false } },
   scene: [Boot, Menu, Shop, Battle, Reward, GameOver, DailyDude]
 };

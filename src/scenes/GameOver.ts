@@ -1,9 +1,13 @@
 import Phaser from 'phaser';
 import { storage } from '../utils/storage';
 import { AchievementSystem } from '../systems/AchievementSystem';
+import { buildRanch } from '../art/Backdrop';
+import { ComicButton, label, panelImage, statPill } from '../art/UIKit';
+import { addDudeImage, addShadow, idleBob } from '../art/DudeSprite';
+import { GOLD, GREEN, INK, PAPER, PAPER_DARK, RED, WOOD } from '../art/palette';
 
 export class GameOver extends Phaser.Scene {
-  wave!: number;
+  wave = 1;
   victory = false;
   dudesData: any[] = [];
 
@@ -16,81 +20,72 @@ export class GameOver extends Phaser.Scene {
   }
 
   create() {
-    this.cameras.main.setBackgroundColor(this.victory ? '#1a2e1a' : '#2e1a1a');
-    this.cameras.main.fadeIn(500);
+    this.cameras.main.fadeIn(420, 126, 209, 245);
+    buildRanch(this, { horizon: this.victory ? 400 : 330, arena: false, clouds: true });
+    this.buildHero();
+    this.buildStats();
+    this.buildActions();
+    this.buildArmyLineup();
+  }
 
-    const title = this.victory ? 'VITÓRIA! 🏆' : 'GAME OVER';
-    const color = this.victory ? '#ffd700' : '#ff4444';
-    this.add.text(960, 320, title, { fontSize: '64px', color, fontStyle: 'bold', stroke: '#000', strokeThickness: 6 } as any).setOrigin(0.5);
-    if (this.victory) {
-      this.add.text(960, 400, 'Você derrotou 10 Waves incluindo o GORILA BOSS!', { fontSize: '20px', color: '#2ecc71' }).setOrigin(0.5);
-      this.add.text(960, 440, '850k combos te esperam para tentar de novo com sinergias diferentes', { fontSize: '14px', color: '#aaa' }).setOrigin(0.5);
-    } else {
-      this.add.text(960, 400, `Você caiu na Wave ${this.wave}`, { fontSize: '24px', color: '#fff' }).setOrigin(0.5);
-      this.add.text(960, 440, this.wave >= 10 ? 'Quase! O Gorila é brutal.' : this.wave >= 7 ? 'Waves mistas exigem sinergias!' : 'Tente reroll e montar 2-3 sinergias core', { fontSize: '14px', color: '#aaa' }).setOrigin(0.5);
-    }
+  private buildHero(): void {
+    panelImage(this, 960, 282, 1020, 290, { fill: PAPER, radius: 34 }).setDepth(100);
+    const title = this.victory ? 'RANCHO SALVO!' : 'FIM DE RODADA';
+    const color = this.victory ? GREEN : RED;
+    statPill(this, 960, 190, this.victory ? 'GRANDE VITORIA' : 'O RANCHO CAIU', color, 330, 46, PAPER).setDepth(101);
+    label(this, 960, 270, title, 66, color, true).setDepth(101);
+    label(this, 960, 344, this.victory ? 'Voce atravessou todas as waves.' : `Voce chegou ate a WAVE ${this.wave}.`, 24, INK).setDepth(101);
+    label(this, 960, 388, this.victory ? 'O gorila nao esquece um bom desafio.' : 'Cada tentativa deixa o proximo exercito mais forte.', 18, INK).setDepth(101).setAlpha(0.72);
+  }
 
-    this.add.text(960, 500, `Exército final: ${this.dudesData.length} dudes`, { fontSize: '16px', color: '#888' }).setOrigin(0.5);
-
-    // Stats
+  private buildStats(): void {
     const relics = storage.load('relics') || [];
-    if (relics.length) {
-      this.add.text(960, 540, `Relíquias coletadas: ${relics.map((r: any) => r.name).join(', ')}`, { fontSize: '12px', color: '#8e44ad' }).setOrigin(0.5);
-    }
-    // Achievements
-    const ac = new AchievementSystem();
-    const unlocked = ac.allData();
-    if (unlocked.length) {
-      this.add.text(960, 570, `Conquistas: ${unlocked.map(a=> a.name).join(' • ')}`, { fontSize: '11px', color: '#f1c40f', wordWrap: { width: 1400 } } as any).setOrigin(0.5);
-    }
-    // Stars
-    try {
-      const stars = JSON.parse(localStorage.getItem('stars') || '{}');
-      const starCount = Object.keys(stars).length;
-      const goldCount = Object.values(stars).filter((s:any)=> s.gold).length;
-      this.add.text(960, 595, `Stars: ${starCount} Silver, ${goldCount} Gold`, { fontSize: '11px', color: '#aaa' }).setOrigin(0.5);
-    } catch {}
+    const stars = this.readStars();
+    const silver = Object.values(stars).filter((star: any) => star.silver).length;
+    const gold = Object.values(stars).filter((star: any) => star.gold).length;
+    const achievements = new AchievementSystem().allData();
 
-    // Play again
-    const btn = this.add.rectangle(960, 620, 320, 80, 0x3498db).setStrokeStyle(4, 0x2980b9).setInteractive({ useHandCursor: true });
-    this.add.text(960, 620, 'JOGAR NOVAMENTE ↻', { fontSize: '22px', color: '#fff', fontStyle: 'bold' }).setOrigin(0.5);
-    btn.on('pointerdown', () => {
-      // save daily board if daily active
-      try {
-        const isDaily = JSON.parse(localStorage.getItem('daily_active') || 'false');
-        if (isDaily) {
-          const board = JSON.parse(localStorage.getItem('daily_board') || '[]');
-          board.push({ wave: this.wave, date: new Date().toISOString().slice(0,10), victory: this.victory });
-          board.sort((a:any,b:any)=> b.wave - a.wave);
-          localStorage.setItem('daily_board', JSON.stringify(board.slice(0,10)));
-          localStorage.removeItem('daily_active');
-        }
-      } catch {}
-      storage.clear('save');
-      storage.clear('relics');
-      this.cameras.main.fadeOut(300, 0, 0, 0);
-      this.time.delayedCall(300, () => this.scene.start('Menu'));
-    });
-    btn.on('pointerover', () => btn.setFillStyle(0x2980b9));
-    btn.on('pointerout', () => btn.setFillStyle(0x3498db));
+    statPill(this, 620, 520, `${this.dudesData.length} DUDES`, WOOD, 200, 40, PAPER).setDepth(101);
+    statPill(this, 850, 520, `${relics.length} RELICS`, PAPER_DARK, 220, 40, INK).setDepth(101);
+    statPill(this, 1100, 520, `${silver} SILVER  ·  ${gold} GOLD`, GOLD, 330, 40, INK).setDepth(101);
+    if (achievements.length) {
+      label(this, 960, 585, `CONQUISTAS  ·  ${achievements.slice(-4).map(a => a.name.toUpperCase()).join('  •  ')}`, 16, INK, true)
+        .setDepth(101).setAlpha(0.78);
+    }
+  }
 
-    // Menu
-    const menuBtn = this.add.rectangle(960, 720, 220, 50, 0x2c3e50).setStrokeStyle(2, 0x34495e).setInteractive({ useHandCursor: true });
-    this.add.text(960, 720, 'MENU', { fontSize: '16px', color: '#fff' }).setOrigin(0.5);
-    menuBtn.on('pointerdown', () => {
-      storage.clear('save');
-      storage.clear('relics');
+  private buildActions(): void {
+    new ComicButton(this, 960, 700, 420, 86, 'JOGAR NOVAMENTE  ↻', () => {
+      this.clearRun();
+      this.cameras.main.fadeOut(260, 0, 0, 0);
+      this.time.delayedCall(260, () => this.scene.start('Menu'));
+    }, { fill: GREEN, size: 31 }).container.setDepth(120);
+
+    new ComicButton(this, 960, 800, 270, 62, 'MENU', () => {
+      this.clearRun();
       this.scene.start('Menu');
+    }, { fill: WOOD, size: 28 }).container.setDepth(120);
+  }
+
+  private buildArmyLineup(): void {
+    const lineup = this.dudesData.slice(0, 8);
+    lineup.forEach((dude, index) => {
+      const x = 690 + index * 80;
+      addShadow(this, x, 1004, 52).setDepth(2);
+      const image = addDudeImage(this, x, 1004, dude.id, 74).setDepth(3);
+      idleBob(this, image, 2 + (index % 2), 760 + index * 50);
     });
+    label(this, 960, 925, this.victory ? 'SEU BANDO DE CAMPEOES' : 'SEU BANDO CHEGOU LONGE', 19, INK, true).setDepth(101).setAlpha(0.82);
+  }
 
-    // pulse victory
-    if (this.victory) {
-      this.tweens.add({ targets: btn, scaleX: 1.05, scaleY: 1.05, duration: 600, yoyo: true, repeat: -1 });
-      this.cameras.main.flash(600, 255, 215, 0);
-    } else {
-      this.cameras.main.shake(400, 0.01);
-    }
+  private readStars(): Record<string, any> {
+    try { return JSON.parse(localStorage.getItem('stars') || '{}'); } catch { return {}; }
+  }
 
-    this.add.text(960, 900, 'Fase 1: 5 dudes • Fase 2: 42 dudes + 6 famílias (em breve)', { fontSize: '11px', color: '#444' }).setOrigin(0.5);
+  private clearRun(): void {
+    storage.clear('save');
+    storage.clear('relics');
+    storage.clear('daily_active');
+    storage.clear('daily_pool');
   }
 }

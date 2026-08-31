@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DudeData } from '../types/DudeData';
+import { dudeKey } from '../art/textures';
 
 export class Dude extends Phaser.GameObjects.Sprite {
   dudeData: DudeData;
@@ -7,15 +8,15 @@ export class Dude extends Phaser.GameObjects.Sprite {
   attackCooldown: number = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number, dudeData: DudeData) {
-    super(scene, x, y, 'missing');
+    super(scene, x, y, scene.textures.exists(dudeKey(dudeData.id)) ? dudeKey(dudeData.id) : 'missing');
     this.dudeData = dudeData;
     this.currentHp = dudeData.stats.hp;
     scene.add.existing(this);
     if (scene.physics && (scene.physics as any).add) {
       scene.physics.add.existing(this);
     }
-    this.setDisplaySize(64, 64);
-    this.setOrigin(0.5);
+    this.setScale(0.72);
+    this.setOrigin(0.5, 0.94);
   }
 
   takeDamage(n: number): void {

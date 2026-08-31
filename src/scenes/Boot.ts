@@ -1,13 +1,12 @@
 import Phaser from 'phaser';
 import { validateDudes, validateWaves, fallbackDudes } from '../utils/validate';
+import { buildAllTextures } from '../art/textures';
 import dudesData from '../data/dudes.json';
 import wavesData from '../data/waves.json';
 
 export class Boot extends Phaser.Scene {
   constructor() { super('Boot'); }
   preload() {
-    // Use missing.png as placeholder for all sprites initially
-    this.load.image('missing', 'assets/sprites/missing.png');
     // Audio - fail gracefully if files missing (handled via loaderror)
     this.load.audio('bgm', 'assets/audio/bgm.mp3');
     this.load.audio('hit', 'assets/audio/hit.wav');
@@ -29,7 +28,10 @@ export class Boot extends Phaser.Scene {
       this.cache.json.add('waves', wavesData as any);
     }
 
-    // ensure missing texture exists even if load failed
+    // Toda a arte e gerada por codigo: 42 dudes + inimigos + FX + backdrop.
+    buildAllTextures(this);
+
+    // Fallback de ultima instancia caso a geracao falhe.
     if (!this.textures.exists('missing')) {
       const g = this.add.graphics();
       g.fillStyle(0xff00ff, 1);

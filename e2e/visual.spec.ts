@@ -6,37 +6,75 @@ const breakpoints = [
   { name: 'mobile', width: 360, height: 800 },
 ];
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as any).__visualTest = true;
+  });
+});
+
+async function waitScene(page: any, key: string): Promise<void> {
+  await page.waitForFunction(() => Boolean((window as any).game?.scene), undefined, { timeout: 25000 });
+  await page.waitForFunction((sceneKey: string) => {
+    return ((window as any).game?.scene?.getScenes(true) ?? [])
+      .some((scene: any) => scene.scene?.key === sceneKey || scene.sys?.settings?.key === sceneKey);
+  }, key, { timeout: 25000 });
+  await page.waitForFunction((sceneKey: string) => {
+    const scene = ((window as any).game?.scene?.getScenes(true) ?? [])
+      .find((active: any) => active.scene?.key === sceneKey || active.sys?.settings?.key === sceneKey);
+    return Boolean(scene && !scene.cameras?.main?.fadeEffect?.isRunning);
+  }, key, { timeout: 25000 });
+  await page.waitForTimeout(650);
+}
+
+async function freezeFrame(page: any): Promise<void> {
+  await page.evaluate(() => {
+    const game = (window as any).game;
+    game?.loop?.stop?.();
+  });
+}
+
+async function deterministicRandom(page: any): Promise<void> {
+  await page.evaluate(() => {
+    let seed = 928374;
+    Math.random = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+  });
+}
+
 for (const bp of breakpoints) {
   test(`visual ${bp.name} shop`, async ({ page }) => {
     await page.setViewportSize({ width: bp.width, height: bp.height });
     await page.goto('/');
+    await deterministicRandom(page);
     await expect(page.locator('canvas')).toBeVisible({ timeout: 10000 });
-    await page.waitForTimeout(1500);
+    await waitScene(page, 'Menu');
     // click PLAY at center
     const box = await page.locator('canvas').boundingBox();
     if (box) {
       const cx = box.x + box.width / 2;
-      const cy = box.y + box.height / 2 + 80;
+      const cy = box.y + box.height * 0.807;
       await page.mouse.click(cx, cy);
-      await page.waitForTimeout(1500);
+      await waitScene(page, 'Shop');
     }
     await expect(page.locator('canvas')).toBeVisible();
-    // allow animations because Phaser canvas is constantly ticking (tweens, particles)
-    await page.waitForTimeout(500);
-    await expect(page).toHaveScreenshot(`shop-${bp.name}.png`, { animations: 'allow', maxDiffPixels: 80000, maxDiffPixelRatio: 0.08 });
+    await freezeFrame(page);
+    await expect(page).toHaveScreenshot(`shop-${bp.name}.png`, { animations: 'disabled', maxDiffPixels: 5000, maxDiffPixelRatio: 0.02 });
   });
 
   test(`visual ${bp.name} battle`, async ({ page }) => {
     await page.setViewportSize({ width: bp.width, height: bp.height });
     await page.goto('/');
+    await deterministicRandom(page);
     await expect(page.locator('canvas')).toBeVisible({ timeout: 10000 });
-    await page.waitForTimeout(1500);
+    await waitScene(page, 'Menu');
     const box = await page.locator('canvas').boundingBox();
     if (box) {
       const cx = box.x + box.width / 2;
-      const cy = box.y + box.height / 2 + 80;
+      const cy = box.y + box.height * 0.807;
       await page.mouse.click(cx, cy);
-      await page.waitForTimeout(1200);
+      await waitScene(page, 'Shop');
       // try to buy first dude (shop slot ~30% width, 30% height of canvas)
       const shopX = box.x + box.width * 0.3;
       const shopY = box.y + box.height * 0.35;
@@ -44,12 +82,12 @@ for (const bp of breakpoints) {
       await page.waitForTimeout(500);
       // click START BATTLE near bottom center
       const battleX = box.x + box.width / 2;
-      const battleY = box.y + box.height * 0.85;
+      const battleY = box.y + box.height * 0.94;
       await page.mouse.click(battleX, battleY);
-      await page.waitForTimeout(2000);
+      await waitScene(page, 'Battle');
     }
     await expect(page.locator('canvas')).toBeVisible();
-    await page.waitForTimeout(500);
-    await expect(page).toHaveScreenshot(`battle-${bp.name}.png`, { animations: 'allow', maxDiffPixels: 80000, maxDiffPixelRatio: 0.08 });
+    await freezeFrame(page);
+    await expect(page).toHaveScreenshot(`battle-${bp.name}.png`, { animations: 'disabled', maxDiffPixels: 5000, maxDiffPixelRatio: 0.02 });
   });
 }
