@@ -1,7 +1,7 @@
 [
   {
     "id": "knight",
-    "name": "Knight",
+    "name": "CAVALEIRO",
     "family": "Warrior",
     "role": "Tank",
     "stats": {
@@ -12,8 +12,8 @@
       "moveSpeed": 80
     },
     "ability": {
-      "type": "shieldBlock",
-      "value": 0.2
+      "type": "block",
+      "value": 0.25
     },
     "cost": 3,
     "sprite": "knight",
@@ -21,7 +21,7 @@
   },
   {
     "id": "zombie",
-    "name": "Zombie",
+    "name": "ZUMBI",
     "family": "Undead",
     "role": "Tank",
     "stats": {
@@ -32,8 +32,8 @@
       "moveSpeed": 60
     },
     "ability": {
-      "type": "regen",
-      "value": 2
+      "type": "cleave",
+      "value": 1
     },
     "cost": 2,
     "sprite": "zombie",
@@ -41,7 +41,7 @@
   },
   {
     "id": "office",
-    "name": "Office Guy",
+    "name": "ZE DA FIRMA",
     "family": "Employed",
     "role": "Support",
     "stats": {
@@ -53,7 +53,7 @@
     },
     "ability": {
       "type": "goldBonus",
-      "value": 1
+      "value": 2
     },
     "cost": 3,
     "sprite": "office",
@@ -61,7 +61,7 @@
   },
   {
     "id": "wizard",
-    "name": "Wizard",
+    "name": "MAGO",
     "family": "Fantasy",
     "role": "DPS",
     "stats": {
@@ -73,7 +73,7 @@
     },
     "ability": {
       "type": "aoe",
-      "value": 10
+      "value": 0.6
     },
     "cost": 4,
     "sprite": "wizard",
@@ -81,7 +81,7 @@
   },
   {
     "id": "astro",
-    "name": "Astro",
+    "name": "ASTRONAUTA",
     "family": "SciFi",
     "role": "DPS",
     "stats": {
@@ -93,7 +93,7 @@
     },
     "ability": {
       "type": "crit",
-      "value": 0.15
+      "value": 0.25
     },
     "cost": 4,
     "sprite": "astro",
@@ -101,7 +101,7 @@
   },
   {
     "id": "barbarian",
-    "name": "Barbarian",
+    "name": "BARBARO",
     "family": "Warrior",
     "role": "Tank",
     "stats": {
@@ -113,7 +113,7 @@
     },
     "ability": {
       "type": "enrage",
-      "value": 0.15
+      "value": 0.05
     },
     "cost": 3,
     "sprite": "barbarian",
@@ -121,7 +121,7 @@
   },
   {
     "id": "samurai",
-    "name": "Samurai",
+    "name": "SAMURAI",
     "family": "Warrior",
     "role": "DPS",
     "stats": {
@@ -132,8 +132,8 @@
       "moveSpeed": 80
     },
     "ability": {
-      "type": "enrage",
-      "value": 0.15
+      "type": "cleave",
+      "value": 2
     },
     "cost": 3,
     "sprite": "samurai",
@@ -141,7 +141,7 @@
   },
   {
     "id": "viking",
-    "name": "Viking",
+    "name": "VIKING",
     "family": "Warrior",
     "role": "Tank",
     "stats": {
@@ -153,7 +153,7 @@
     },
     "ability": {
       "type": "enrage",
-      "value": 0.15
+      "value": 0.07
     },
     "cost": 3,
     "sprite": "viking",
@@ -161,7 +161,7 @@
   },
   {
     "id": "gladiator",
-    "name": "Gladiator",
+    "name": "GLADIADOR",
     "family": "Warrior",
     "role": "Tank",
     "stats": {
@@ -172,8 +172,8 @@
       "moveSpeed": 75
     },
     "ability": {
-      "type": "enrage",
-      "value": 0.15
+      "type": "taunt",
+      "value": 3
     },
     "cost": 3,
     "sprite": "gladiator",
@@ -181,7 +181,7 @@
   },
   {
     "id": "monk",
-    "name": "Monk",
+    "name": "MONGE",
     "family": "Warrior",
     "role": "DPS",
     "stats": {
@@ -192,8 +192,8 @@
       "moveSpeed": 85
     },
     "ability": {
-      "type": "enrage",
-      "value": 0.15
+      "type": "haste",
+      "value": 0.2
     },
     "cost": 4,
     "sprite": "monk",
@@ -201,7 +201,7 @@
   },
   {
     "id": "warlord",
-    "name": "Warlord",
+    "name": "GENERAL",
     "family": "Warrior",
     "role": "Tank",
     "stats": {
@@ -212,8 +212,8 @@
       "moveSpeed": 70
     },
     "ability": {
-      "type": "enrage",
-      "value": 0.15
+      "type": "rally",
+      "value": 0.25
     },
     "cost": 5,
     "sprite": "warlord",
@@ -221,7 +221,7 @@
   },
   {
     "id": "skeleton",
-    "name": "Skeleton",
+    "name": "CAVEIRA",
     "family": "Undead",
     "role": "Support",
     "stats": {
@@ -233,7 +233,7 @@
     },
     "ability": {
       "type": "regen",
-      "value": 2
+      "value": 3
     },
     "cost": 2,
     "sprite": "skeleton",
@@ -241,7 +241,7 @@
   },
   {
     "id": "ghost",
-    "name": "Ghost",
+    "name": "FANTASMA",
     "family": "Undead",
     "role": "Support",
     "stats": {
@@ -252,8 +252,8 @@
       "moveSpeed": 90
     },
     "ability": {
-      "type": "regen",
-      "value": 2
+      "type": "block",
+      "value": 0.3
     },
     "cost": 2,
     "sprite": "ghost",
@@ -261,7 +261,7 @@
   },
   {
     "id": "vampire",
-    "name": "Vampire",
+    "name": "VAMPIRO",
     "family": "Undead",
     "role": "Support",
     "stats": {
@@ -272,8 +272,8 @@
       "moveSpeed": 80
     },
     "ability": {
-      "type": "regen",
-      "value": 2
+      "type": "lifesteal",
+      "value": 0.35
     },
     "cost": 3,
     "sprite": "vampire",
@@ -281,7 +281,7 @@
   },
   {
     "id": "lich",
-    "name": "Lich",
+    "name": "MAGO MORTO",
     "family": "Undead",
     "role": "DPS",
     "stats": {
@@ -292,8 +292,8 @@
       "moveSpeed": 75
     },
     "ability": {
-      "type": "regen",
-      "value": 2
+      "type": "aoe",
+      "value": 0.5
     },
     "cost": 4,
     "sprite": "lich",
@@ -301,7 +301,7 @@
   },
   {
     "id": "mummy",
-    "name": "Mummy",
+    "name": "MUMIA",
     "family": "Undead",
     "role": "Tank",
     "stats": {
@@ -312,8 +312,8 @@
       "moveSpeed": 60
     },
     "ability": {
-      "type": "regen",
-      "value": 2
+      "type": "taunt",
+      "value": 2.5
     },
     "cost": 3,
     "sprite": "mummy",
@@ -321,7 +321,7 @@
   },
   {
     "id": "boneknight",
-    "name": "Bone Knight",
+    "name": "OSSUDO",
     "family": "Undead",
     "role": "Tank",
     "stats": {
@@ -332,8 +332,8 @@
       "moveSpeed": 70
     },
     "ability": {
-      "type": "regen",
-      "value": 2
+      "type": "deathscale",
+      "value": 0.12
     },
     "cost": 4,
     "sprite": "boneknight",
@@ -341,7 +341,7 @@
   },
   {
     "id": "barista",
-    "name": "Barista",
+    "name": "BARISTA",
     "family": "Employed",
     "role": "Support",
     "stats": {
@@ -352,8 +352,8 @@
       "moveSpeed": 85
     },
     "ability": {
-      "type": "goldBonus",
-      "value": 0.15
+      "type": "heal",
+      "value": 3
     },
     "cost": 2,
     "sprite": "barista",
@@ -361,7 +361,7 @@
   },
   {
     "id": "cashier",
-    "name": "Cashier",
+    "name": "CAIXA",
     "family": "Employed",
     "role": "Support",
     "stats": {
@@ -373,7 +373,7 @@
     },
     "ability": {
       "type": "goldBonus",
-      "value": 0.15
+      "value": 3
     },
     "cost": 2,
     "sprite": "cashier",
@@ -381,7 +381,7 @@
   },
   {
     "id": "manager",
-    "name": "Manager",
+    "name": "GERENTE",
     "family": "Employed",
     "role": "Support",
     "stats": {
@@ -392,8 +392,8 @@
       "moveSpeed": 80
     },
     "ability": {
-      "type": "goldBonus",
-      "value": 0.15
+      "type": "haste",
+      "value": 0.18
     },
     "cost": 3,
     "sprite": "manager",
@@ -401,7 +401,7 @@
   },
   {
     "id": "intern",
-    "name": "Intern",
+    "name": "ESTAGIARIO",
     "family": "Employed",
     "role": "Support",
     "stats": {
@@ -413,7 +413,7 @@
     },
     "ability": {
       "type": "goldBonus",
-      "value": 0.15
+      "value": 1
     },
     "cost": 1,
     "sprite": "intern",
@@ -421,7 +421,7 @@
   },
   {
     "id": "courier",
-    "name": "Courier",
+    "name": "ENTREGADOR",
     "family": "Employed",
     "role": "Support",
     "stats": {
@@ -432,8 +432,8 @@
       "moveSpeed": 100
     },
     "ability": {
-      "type": "goldBonus",
-      "value": 0.15
+      "type": "regen",
+      "value": 2
     },
     "cost": 2,
     "sprite": "courier",
@@ -441,7 +441,7 @@
   },
   {
     "id": "ceo",
-    "name": "CEO",
+    "name": "PATRAO",
     "family": "Employed",
     "role": "DPS",
     "stats": {
@@ -452,8 +452,8 @@
       "moveSpeed": 80
     },
     "ability": {
-      "type": "goldBonus",
-      "value": 0.15
+      "type": "rally",
+      "value": 0.22
     },
     "cost": 4,
     "sprite": "ceo",
@@ -461,7 +461,7 @@
   },
   {
     "id": "elf",
-    "name": "Elf",
+    "name": "ELFO",
     "family": "Fantasy",
     "role": "DPS",
     "stats": {
@@ -472,8 +472,8 @@
       "moveSpeed": 85
     },
     "ability": {
-      "type": "aoe",
-      "value": 0.15
+      "type": "crit",
+      "value": 0.3
     },
     "cost": 3,
     "sprite": "elf",
@@ -481,7 +481,7 @@
   },
   {
     "id": "druid",
-    "name": "Druid",
+    "name": "DRUIDA",
     "family": "Fantasy",
     "role": "Support",
     "stats": {
@@ -492,8 +492,8 @@
       "moveSpeed": 80
     },
     "ability": {
-      "type": "aoe",
-      "value": 0.15
+      "type": "heal",
+      "value": 4
     },
     "cost": 3,
     "sprite": "druid",
@@ -501,7 +501,7 @@
   },
   {
     "id": "bard",
-    "name": "Bard",
+    "name": "BARDO",
     "family": "Fantasy",
     "role": "Support",
     "stats": {
@@ -512,8 +512,8 @@
       "moveSpeed": 85
     },
     "ability": {
-      "type": "aoe",
-      "value": 0.15
+      "type": "rally",
+      "value": 0.2
     },
     "cost": 3,
     "sprite": "bard",
@@ -521,7 +521,7 @@
   },
   {
     "id": "paladin",
-    "name": "Paladin",
+    "name": "PALADINO",
     "family": "Fantasy",
     "role": "Tank",
     "stats": {
@@ -532,8 +532,8 @@
       "moveSpeed": 75
     },
     "ability": {
-      "type": "aoe",
-      "value": 0.15
+      "type": "block",
+      "value": 0.3
     },
     "cost": 4,
     "sprite": "paladin",
@@ -541,7 +541,7 @@
   },
   {
     "id": "necro",
-    "name": "Necro",
+    "name": "NECROMANTE",
     "family": "Fantasy",
     "role": "DPS",
     "stats": {
@@ -552,8 +552,8 @@
       "moveSpeed": 75
     },
     "ability": {
-      "type": "aoe",
-      "value": 0.15
+      "type": "summon",
+      "value": 6
     },
     "cost": 4,
     "sprite": "necro",
@@ -561,7 +561,7 @@
   },
   {
     "id": "dragon",
-    "name": "Dragon",
+    "name": "DRAGAO",
     "family": "Fantasy",
     "role": "Tank",
     "stats": {
@@ -573,7 +573,7 @@
     },
     "ability": {
       "type": "aoe",
-      "value": 0.15
+      "value": 0.8
     },
     "cost": 5,
     "sprite": "dragon",
@@ -581,7 +581,7 @@
   },
   {
     "id": "robot",
-    "name": "Robot",
+    "name": "ROBO",
     "family": "SciFi",
     "role": "Support",
     "stats": {
@@ -592,8 +592,8 @@
       "moveSpeed": 75
     },
     "ability": {
-      "type": "crit",
-      "value": 0.15
+      "type": "taunt",
+      "value": 2.5
     },
     "cost": 3,
     "sprite": "robot",
@@ -601,7 +601,7 @@
   },
   {
     "id": "cyborg",
-    "name": "Cyborg",
+    "name": "CIBORGUE",
     "family": "SciFi",
     "role": "DPS",
     "stats": {
@@ -612,8 +612,8 @@
       "moveSpeed": 80
     },
     "ability": {
-      "type": "crit",
-      "value": 0.15
+      "type": "lifesteal",
+      "value": 0.25
     },
     "cost": 3,
     "sprite": "cyborg",
@@ -621,7 +621,7 @@
   },
   {
     "id": "alien",
-    "name": "Alien",
+    "name": "ET",
     "family": "SciFi",
     "role": "Support",
     "stats": {
@@ -632,8 +632,8 @@
       "moveSpeed": 85
     },
     "ability": {
-      "type": "crit",
-      "value": 0.15
+      "type": "aoe",
+      "value": 0.45
     },
     "cost": 3,
     "sprite": "alien",
@@ -641,7 +641,7 @@
   },
   {
     "id": "mech",
-    "name": "Mech",
+    "name": "MECA",
     "family": "SciFi",
     "role": "Tank",
     "stats": {
@@ -652,8 +652,8 @@
       "moveSpeed": 70
     },
     "ability": {
-      "type": "crit",
-      "value": 0.15
+      "type": "block",
+      "value": 0.28
     },
     "cost": 4,
     "sprite": "mech",
@@ -661,7 +661,7 @@
   },
   {
     "id": "hacker",
-    "name": "Hacker",
+    "name": "HACKER",
     "family": "SciFi",
     "role": "Support",
     "stats": {
@@ -672,8 +672,8 @@
       "moveSpeed": 90
     },
     "ability": {
-      "type": "crit",
-      "value": 0.15
+      "type": "haste",
+      "value": 0.25
     },
     "cost": 3,
     "sprite": "hacker",
@@ -681,7 +681,7 @@
   },
   {
     "id": "starlord",
-    "name": "Star Lord",
+    "name": "REI ESTELAR",
     "family": "SciFi",
     "role": "DPS",
     "stats": {
@@ -693,7 +693,7 @@
     },
     "ability": {
       "type": "crit",
-      "value": 0.15
+      "value": 0.35
     },
     "cost": 4,
     "sprite": "starlord",
@@ -701,7 +701,7 @@
   },
   {
     "id": "ninja",
-    "name": "Ninja",
+    "name": "NINJA",
     "family": "Action",
     "role": "DPS",
     "stats": {
@@ -712,8 +712,8 @@
       "moveSpeed": 95
     },
     "ability": {
-      "type": "balanced",
-      "value": 0.15
+      "type": "crit",
+      "value": 0.3
     },
     "cost": 3,
     "sprite": "ninja",
@@ -721,7 +721,7 @@
   },
   {
     "id": "pirate",
-    "name": "Pirate",
+    "name": "PIRATA",
     "family": "Action",
     "role": "Support",
     "stats": {
@@ -732,8 +732,8 @@
       "moveSpeed": 80
     },
     "ability": {
-      "type": "balanced",
-      "value": 0.15
+      "type": "cleave",
+      "value": 2
     },
     "cost": 3,
     "sprite": "pirate",
@@ -741,7 +741,7 @@
   },
   {
     "id": "cowboy",
-    "name": "Cowboy",
+    "name": "CAUBOI",
     "family": "Action",
     "role": "DPS",
     "stats": {
@@ -752,8 +752,8 @@
       "moveSpeed": 85
     },
     "ability": {
-      "type": "balanced",
-      "value": 0.15
+      "type": "crit",
+      "value": 0.25
     },
     "cost": 3,
     "sprite": "cowboy",
@@ -761,7 +761,7 @@
   },
   {
     "id": "spy",
-    "name": "Spy",
+    "name": "ESPIAO",
     "family": "Action",
     "role": "Support",
     "stats": {
@@ -772,8 +772,8 @@
       "moveSpeed": 90
     },
     "ability": {
-      "type": "balanced",
-      "value": 0.15
+      "type": "crit",
+      "value": 0.4
     },
     "cost": 3,
     "sprite": "spy",
@@ -781,7 +781,7 @@
   },
   {
     "id": "athlete",
-    "name": "Athlete",
+    "name": "ATLETA",
     "family": "Action",
     "role": "Tank",
     "stats": {
@@ -792,8 +792,8 @@
       "moveSpeed": 100
     },
     "ability": {
-      "type": "balanced",
-      "value": 0.15
+      "type": "haste",
+      "value": 0.2
     },
     "cost": 3,
     "sprite": "athlete",
@@ -801,7 +801,7 @@
   },
   {
     "id": "chef",
-    "name": "Chef",
+    "name": "COZINHEIRO",
     "family": "Action",
     "role": "Support",
     "stats": {
@@ -812,8 +812,8 @@
       "moveSpeed": 80
     },
     "ability": {
-      "type": "balanced",
-      "value": 0.15
+      "type": "heal",
+      "value": 3
     },
     "cost": 2,
     "sprite": "chef",
@@ -821,7 +821,7 @@
   },
   {
     "id": "dude",
-    "name": "Dude",
+    "name": "CARA",
     "family": "Action",
     "role": "Support",
     "stats": {
@@ -832,8 +832,8 @@
       "moveSpeed": 85
     },
     "ability": {
-      "type": "balanced",
-      "value": 0.15
+      "type": "regen",
+      "value": 1
     },
     "cost": 1,
     "sprite": "dude",

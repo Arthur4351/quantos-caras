@@ -25,4 +25,22 @@ describe('AchievementSystem', () => {
     const ac2 = new AchievementSystem();
     expect(ac2.has('first_win')).toBe(true);
   });
+  it('exercito grande acende multidao e o titulo do jogo', () => {
+    const ac = new AchievementSystem();
+    ac.check({ wave: 8, victory: true, noDeath: false, dudesCollected: 5, relicsCollected: 1, synergyMax: 2, army: 50 });
+    expect(ac.has('army_50')).toBe(true);
+    expect(ac.has('army_120')).toBe(false);
+    ac.check({ wave: 20, victory: true, noDeath: false, dudesCollected: 5, relicsCollected: 1, synergyMax: 2, army: 120 });
+    expect(ac.has('army_120')).toBe(true);
+  });
+  /** Nenhuma conquista pode ser impossivel de acender. */
+  it('todo id em achievements.json e distribuido pelo check', async () => {
+    const data = (await import('../../src/data/achievements.json')).default as Array<{ id: string }>;
+    const ac = new AchievementSystem();
+    const got = new Set([
+      ...ac.check({ wave: 100, victory: true, noDeath: true, dudesCollected: 5, relicsCollected: 5, synergyMax: 6, army: 160 })
+    ]);
+    const dead = data.filter(a => !got.has(a.id)).map(a => a.id);
+    expect(dead).toEqual([]);
+  });
 });

@@ -1,45 +1,48 @@
 import Phaser from 'phaser';
+import { Fighter } from './Fighter';
 import { enemyKey, ENEMY_ORIGIN, ENEMY_SIZE } from '../art/textures';
+import { enemyType, enemyKit } from '../systems/enemyTypes';
 
-export class Enemy extends Phaser.GameObjects.Sprite {
-  currentHp: number;
-  maxHp: number;
-  atk: number;
-  type: string;
+export class Enemy extends Fighter {
+  readonly type: string;
+  /** Abelhas flutuam: o rig sobe um pouco e balanca. */
+  readonly flying: boolean;
 
   constructor(scene: Phaser.Scene, x: number, y: number, hp: number, atk: number, type = 'toddler') {
-    super(scene, x, y, scene.textures.exists(enemyKey(type)) ? enemyKey(type) : 'missing');
-    this.currentHp = hp;
-    this.maxHp = hp;
-    this.atk = atk;
+    const t = enemyType(type);
+    const hasArt = scene.textures.exists(enemyKey(type));
+    const key = hasArt ? enemyKey(type) : 'missing';
+    const size = ENEMY_SIZE[type];
+    /**
+     * Barra e numeros SO em boss. Com elite tambem (unicornio, urso) a wave 30
+     * ficava com 40 barrinhas verdes flutuando sobre a multidao — palitos de HUD
+     * competindo com os bichos. O chefe e a unica luta com pace de barra.
+     */
+    const notable = !!t.boss;
+    super(scene, x, y, key, {
+      team: 'enemy',
+      hp,
+      atk,
+      range: t.range,
+      attackSpeed: t.attackSpeed,
+      moveSpeed: t.moveSpeed,
+      kit: enemyKit(type),
+      visualHeight: t.height,
+      sourceHeight: size ? size.h : 116,
+      sourceWidth: size ? size.w : 104,
+      bodyWidth: size ? size.w * 0.86 : 92,
+      footOrigin: size ? ENEMY_ORIGIN[type] : 0.94,
+      barWidth: Math.max(56, Math.round(t.height * 0.8)),
+      bar: notable,
+      numbers: notable
+    });
     this.type = type;
-    scene.add.existing(this);
-    if (scene.physics && (scene.physics as any).add) {
-      scene.physics.add.existing(this);
-    }
-    const artSize = ENEMY_SIZE[type];
-    const desiredHeight = type === 'gorilla' || type === 'god' ? 210 : type === 'wolf' ? 112 : 78;
-    this.setScale(artSize ? desiredHeight / artSize.h : 0.72);
-    this.setOrigin(0.5, artSize ? ENEMY_ORIGIN[type] : 0.94);
-    this.setTint(0xff4444);
-    this.setOrigin(0.5);
+    this.flying = !!t.flying;
   }
 
-  takeDamage(n: number): void {
-    this.currentHp = Math.max(0, this.currentHp - n);
-    this.setTint(0xffaaaa);
-    if (this.scene) {
-      this.scene.time.delayedCall(100, () => {
-        if (this.active && this.isAlive()) this.setTint(0xff4444);
-      });
-    }
-    if (!this.isAlive()) {
-      this.setTint(0x333333);
-      this.setAlpha(0.5);
-    }
-  }
+  /** Compatibilidade com o codigo antigo que le currentHp. */
+  get currentHp(): number { return this.hp; }
+  set currentHp(v: number) { this.hp = v; }
 
-  isAlive(): boolean {
-    return this.currentHp > 0;
-  }
+  takeDamage(n: number): void { this.hurt(n); }
 }

@@ -14,6 +14,13 @@ export interface RanchOpts {
   arenaY?: number;
   arenaW?: number;
   arenaH?: number;
+  /**
+   * `ellipse` e o picadeiro pequeno das telas de menu/loja. `field` e o CORRAL
+   * inteiro: um retangulo arredondado de terra que ocupa o campo todo, porque
+   * uma horda de 280 bichos em bloco nao cabe numa elipse — sobrava tropa na
+   * grama e nos cantos.
+   */
+  shape?: 'ellipse' | 'field';
   /** Nuvens animadas. */
   clouds?: boolean;
 }
@@ -31,9 +38,10 @@ export function buildRanch(scene: Phaser.Scene, o: RanchOpts = {}): void {
   const horizon = o.horizon ?? 430;
   const arena = o.arena !== false;
   const ay = o.arenaY ?? 700, aw = o.arenaW ?? 1620, ah = o.arenaH ?? 560;
-  const key = `bg_ranch_${horizon}_${arena ? `${ay}x${aw}x${ah}` : 'flat'}`;
+  const shape = o.shape ?? 'ellipse';
+  const key = `bg_ranch_${horizon}_${arena ? `${shape}${ay}x${aw}x${ah}` : 'flat'}`;
 
-  shapeTexture(scene, key, W, H, g => paintRanch(g, horizon, arena, ay, aw, ah), false);
+  shapeTexture(scene, key, W, H, g => paintRanch(g, horizon, arena, ay, aw, ah, shape), false);
   scene.add.image(0, 0, key).setOrigin(0, 0).setDepth(-100);
 
   if (o.clouds !== false) addClouds(scene, horizon);
@@ -41,7 +49,8 @@ export function buildRanch(scene: Phaser.Scene, o: RanchOpts = {}): void {
 
 function paintRanch(
   g: Phaser.GameObjects.Graphics, horizon: number,
-  arena: boolean, ay: number, aw: number, ah: number
+  arena: boolean, ay: number, aw: number, ah: number,
+  shape: 'ellipse' | 'field' = 'ellipse'
 ): void {
   const W = 1920, H = 1080;
 
@@ -93,19 +102,58 @@ function paintRanch(
   // ---- Arena de terra ----
   if (arena) {
     const ax = 960;
-    g.fillStyle(INK, 1);
-    g.fillEllipse(ax, ay, aw + OUTLINE * 2, ah + OUTLINE * 2);
-    g.fillStyle(DIRT_DARK, 1);
-    g.fillEllipse(ax, ay, aw, ah);
-    g.fillStyle(DIRT, 1);
-    g.fillEllipse(ax, ay - 8, aw - 34, ah - 40);
-    for (let i = 0; i < 26; i++) {
-      const a = rng.frac() * Math.PI * 2;
-      const rr = Math.sqrt(rng.frac());
-      g.fillStyle(DIRT_DARK, 0.55);
-      g.fillEllipse(ax + Math.cos(a) * rr * (aw / 2 - 60), ay - 8 + Math.sin(a) * rr * (ah / 2 - 50), 26, 12);
-    }
+    if (shape === 'field') paintCorral(g, rng, ax, ay, aw, ah);
+    else paintRing(g, rng, ax, ay, aw, ah);
   }
+}
+
+/** Picadeiro: elipse de terra. Serve menu e loja, onde ha 1 ou 2 caras posando. */
+function paintRing(
+  g: Phaser.GameObjects.Graphics, rng: Phaser.Math.RandomDataGenerator,
+  ax: number, ay: number, aw: number, ah: number
+): void {
+  g.fillStyle(INK, 1);
+  g.fillEllipse(ax, ay, aw + OUTLINE * 2, ah + OUTLINE * 2);
+  g.fillStyle(DIRT_DARK, 1);
+  g.fillEllipse(ax, ay, aw, ah);
+  g.fillStyle(DIRT, 1);
+  g.fillEllipse(ax, ay - 8, aw - 34, ah - 40);
+  for (let i = 0; i < 26; i++) {
+    const a = rng.frac() * Math.PI * 2;
+    const rr = Math.sqrt(rng.frac());
+    g.fillStyle(DIRT_DARK, 0.55);
+    g.fillEllipse(ax + Math.cos(a) * rr * (aw / 2 - 60), ay - 8 + Math.sin(a) * rr * (ah / 2 - 50), 26, 12);
+  }
+}
+
+/**
+ * O CORRAL da batalha: retangulo de terra arredondado que cobre o campo todo,
+ * com moldura de grama. Uma horda de 280 bichos e um BLOCO retangular — numa
+ * elipse os cantos sobravam na grama e a tropa da direita saia da tela.
+ */
+function paintCorral(
+  g: Phaser.GameObjects.Graphics, rng: Phaser.Math.RandomDataGenerator,
+  ax: number, ay: number, aw: number, ah: number
+): void {
+  const x = ax - aw / 2, y = ay - ah / 2;
+  const r = 108;
+  g.fillStyle(INK, 1);
+  g.fillRoundedRect(x - OUTLINE, y - OUTLINE, aw + OUTLINE * 2, ah + OUTLINE * 2, r + OUTLINE);
+  g.fillStyle(DIRT_DARK, 1);
+  g.fillRoundedRect(x, y, aw, ah, r);
+  g.fillStyle(DIRT, 1);
+  g.fillRoundedRect(x + 16, y + 14, aw - 32, ah - 40, r - 22);
+
+  // pisadas: manchas mais escuras espalhadas pelo chao batido
+  for (let i = 0; i < 54; i++) {
+    const px = x + 60 + rng.frac() * (aw - 120);
+    const py = y + 50 + rng.frac() * (ah - 110);
+    g.fillStyle(DIRT_DARK, 0.5);
+    g.fillEllipse(px, py, 22 + rng.frac() * 26, 10 + rng.frac() * 8);
+  }
+  // trilha de gado no fundo do corral, so pra terra nao ficar chapada demais
+  g.fillStyle(DIRT_DARK, 0.34);
+  g.fillRect(x + 40, y + ah * 0.26, aw - 80, 12);
 }
 
 function drawFence(g: Phaser.GameObjects.Graphics, horizon: number): void {
@@ -130,14 +178,20 @@ function addClouds(scene: Phaser.Scene, horizon: number): void {
   // Visual regression captures use a deterministic still frame; the live game keeps motion.
   if ((globalThis as any).__visualTest) return;
   if (!scene.textures.exists('bg_cloud')) return;
+  /**
+   * Todas as nuvens vivem ABAIXO da faixa do HUD (y > 168). Elas atravessam a
+   * tela inteira, entao spot alto = nuvem passando atras do pill de WAVE e do
+   * contador de ouro — o ceu embaixo do HUD e o unico lugar limpo.
+   */
   const spots = [
-    { x: 220, y: 110, s: 1.5, sp: 34000 },
-    { x: 700, y: 190, s: 1.0, sp: 46000 },
-    { x: 1180, y: 96, s: 1.8, sp: 52000 },
-    { x: 1520, y: 240, s: 0.85, sp: 40000 }
+    { x: 220, y: 182, s: 1.15, sp: 34000 },
+    { x: 700, y: 224, s: 0.9, sp: 46000 },
+    { x: 1180, y: 196, s: 1.3, sp: 52000 },
+    { x: 1520, y: 236, s: 0.8, sp: 40000 }
   ];
   spots.forEach(c => {
-    const img = scene.add.image(c.x, Math.min(c.y, horizon - 90), 'bg_cloud')
+    const y = Math.max(168, Math.min(c.y, horizon - 86));
+    const img = scene.add.image(c.x, y, 'bg_cloud')
       .setScale(c.s).setDepth(-95).setAlpha(0.95);
     scene.tweens.add({
       targets: img, x: c.x + 2400, duration: c.sp, repeat: -1,

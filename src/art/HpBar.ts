@@ -2,11 +2,21 @@ import Phaser from 'phaser';
 import { INK, GREEN, GOLD, RED, WHITE } from './palette';
 import { shapeTexture } from './bakery';
 
+export interface HpBarOpts {
+  /**
+   * Borda em que o preenchimento se ancora. `right` esvazia da esquerda para a
+   * direita — e o que a barra do inimigo, espelhada no canto oposto, precisa.
+   */
+  anchor?: 'left' | 'right';
+  /** Cor fixa: ignora o verde -> ouro -> vermelho por ratio. */
+  tint?: number;
+}
+
 /**
  * Barra de vida no estilo adesivo: moldura de tinta + preenchimento chapado.
  *
- * Duas texturas assadas, zero Graphics vivo. O preenchimento tem origem na
- * borda esquerda, entao mudar a vida e um scaleX puro — nunca um redraw.
+ * Duas texturas assadas, zero Graphics vivo. O preenchimento tem origem numa das
+ * bordas, entao mudar a vida e um scaleX puro — nunca um redraw.
  * A cor vem de tint sobre um preenchimento branco, o que permite virar
  * verde -> ouro -> vermelho sem gerar textura nova.
  */
@@ -15,7 +25,7 @@ export class HpBar {
   private fill: Phaser.GameObjects.Image;
   private ratio = 1;
 
-  constructor(private scene: Phaser.Scene, private w: number, private h: number) {
+  constructor(private scene: Phaser.Scene, private w: number, private h: number, private o: HpBarOpts = {}) {
     const r = h / 2;
     const fk = `hpfr_${w}x${h}`;
     shapeTexture(scene, fk, w + 14, h + 14, g => {
@@ -35,21 +45,23 @@ export class HpBar {
     }, false);
 
     this.frame = scene.add.image(0, 0, fk);
-    // a origem na esquerda transforma "vida" em scaleX
-    this.fill = scene.add.image(0, 0, bk).setOrigin(0, 0.5).setTint(GREEN);
+    // a origem na borda transforma "vida" em scaleX
+    this.fill = scene.add.image(0, 0, bk)
+      .setOrigin(o.anchor === 'right' ? 1 : 0, 0.5)
+      .setTint(o.tint ?? GREEN);
   }
 
   setRatio(v: number): this {
     this.ratio = Phaser.Math.Clamp(v, 0, 1);
     this.fill.setScale(this.ratio, 1);
-    this.fill.setTint(this.ratio > 0.55 ? GREEN : this.ratio > 0.25 ? GOLD : RED);
+    this.fill.setTint(this.o.tint ?? (this.ratio > 0.55 ? GREEN : this.ratio > 0.25 ? GOLD : RED));
     return this;
   }
 
-  /** x,y = centro da barra. O preenchimento se ancora na borda esquerda. */
+  /** x,y = centro da barra. O preenchimento se ancora na borda escolhida. */
   setPosition(x: number, y: number): this {
     this.frame.setPosition(x, y);
-    this.fill.setPosition(x - this.w / 2, y);
+    this.fill.setPosition(x + (this.o.anchor === 'right' ? this.w / 2 : -this.w / 2), y);
     return this;
   }
 

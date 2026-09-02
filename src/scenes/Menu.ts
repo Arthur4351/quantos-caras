@@ -5,7 +5,11 @@ import { addDudeImage, addShadow, idleBob } from '../art/DudeSprite';
 import { INK, WOOD, WOOD_DARK, GOLD, PAPER, WHITE, GREEN, ORANGE, css } from '../art/palette';
 import { OUTLINE } from '../art/ink';
 import { shapeTexture } from '../art/bakery';
+import { storage } from '../utils/storage';
+import { startingInventory } from '../systems/RunState';
 import dudesJson from '../data/dudes.json';
+import relicsJson from '../data/relics.json';
+import familiesJson from '../data/families.json';
 
 /** Elenco escolhido a dedo para a multidao da capa — 1 de cada familia + estrelas. */
 const COVER_CAST = [
@@ -29,7 +33,11 @@ export class Menu extends Phaser.Scene {
     this.buildButtons();
 
     const cnt = (dudesJson as any[]).length;
-    statPill(this, 960, 1052, `${cnt} DUDES  •  100 WAVES  •  15 RELICS  •  6 FAMILIAS`, PAPER, 760, 44, INK)
+    // "15 RELICS" era chumbo grosso: as reliquias mortas sairam do jogo e o numero
+    // continuava la, em ingles, no meio de uma frase em portugues. Conta os dados.
+    const rel = (relicsJson as any[]).length;
+    const fam = Object.keys(familiesJson as any).length;
+    statPill(this, 960, 1052, `${cnt} CARAS  •  100 WAVES  •  ${rel} RELIQUIAS  •  ${fam} FAMILIAS`, PAPER, 760, 44, INK)
       .setDepth(200);
   }
 
@@ -70,7 +78,16 @@ export class Menu extends Phaser.Scene {
     this.add.image(0, 0, 'menu_sign').setOrigin(0, 0).setDepth(10);
 
     bigTitle(this, 960, 236, 'QUANTOS CARAS?', 96, GOLD).setDepth(11);
-    label(this, 960, 320, 'HOW MANY DUDES  —  ROGUELIKE DUDEBUILDER', 30, PAPER, true).setDepth(11);
+    /**
+     * A LINHA DE BAIXO DA PLACA FALAVA INGLES.
+     *
+     * "HOW MANY DUDES — ROGUELIKE DUDEBUILDER" a 30px era o segundo maior texto do
+     * menu: o nome do jogo de referencia e um genero em ingles, embaixo de um titulo
+     * em portugues, na primeira tela que o jogador ve. Placa de entrada nao e credito
+     * de inspiracao — e a promessa do jogo. Agora ela diz o que se faz aqui, na mesma
+     * lingua do titulo: junta caras, encara a horda, salva o rancho.
+     */
+    label(this, 960, 320, 'JUNTE OS CARAS  ·  ENCARE A HORDA  ·  SALVE O RANCHO', 30, PAPER, true).setDepth(11);
   }
 
   /** A multidao: a assinatura visual do jogo e a densidade de dudes. */
@@ -99,14 +116,55 @@ export class Menu extends Phaser.Scene {
 
   private buildButtons(): void {
     new ComicButton(this, 960, 872, 460, 118, 'JOGAR  ▶', () => {
-      try { localStorage.removeItem('daily_active'); localStorage.removeItem('daily_pool'); } catch {}
+      /**
+       * RUN NOVA E RUN NOVA. Sem apagar o save, "JOGAR" ressuscitava o exercito
+       * da run anterior: o jogador clicava em comecar e caia na wave 12 com
+       * quatorze caras e tres reliquias. Quem quer voltar de onde parou usa o
+       * CONTINUAR do canto — que so existe quando ha o que continuar.
+       */
+      try {
+        localStorage.removeItem('save');
+        localStorage.removeItem('relics');
+        localStorage.removeItem('daily_active');
+        localStorage.removeItem('daily_pool');
+      } catch {}
       this.cameras.main.fadeOut(260, 0, 0, 0);
-      this.time.delayedCall(260, () => this.scene.start('Shop', { wave: 1 }));
+      /**
+       * A RUN NASCE COM O CARA DENTRO.
+       *
+       * Antes o jogador caia na loja com o rancho VAZIO e um draft de tres
+       * estranhos: nenhum cara era dele, nada pra treinar, nada pra defender. O
+       * CARA e o unico que atravessa a run inteira e o unico que o treinador
+       * aceita — entao ele tem que estar lá antes da primeira carta.
+       */
+      this.time.delayedCall(260, () => this.scene.start('Shop', {
+        wave: 1, inventory: startingInventory()
+      }));
     }, { fill: GREEN, size: 54 }).pulse().container.setDepth(300);
 
-    new ComicButton(this, 960, 984, 340, 62, 'DAILY DUDE  ★', () => {
+    // O botao dizia "DAILY DUDE" e abria uma tela cujo titulo e "DESAFIO DIARIO":
+    // o mesmo modo com dois nomes, um em cada idioma. Fica o da tela.
+    new ComicButton(this, 960, 984, 340, 62, 'DESAFIO DIARIO  ★', () => {
       this.cameras.main.fadeOut(260, 0, 0, 0);
       this.time.delayedCall(260, () => this.scene.start('DailyDude'));
     }, { fill: ORANGE, size: 28 }).container.setDepth(300);
+
+    this.buildContinue();
+  }
+
+  /** Volta pra run salva. Pendurado no poste da direita, longe do CTA. */
+  private buildContinue(): void {
+    const saved = storage.load('save');
+    if (!saved || !Array.isArray(saved.inventory) || saved.inventory.length === 0) return;
+    const wave = Math.max(1, saved.wave ?? 1);
+    new ComicButton(this, 1706, 110, 372, 72, `CONTINUAR · WAVE ${wave}`, () => {
+      this.cameras.main.fadeOut(260, 0, 0, 0);
+      this.time.delayedCall(260, () => this.scene.start('Shop', {
+        wave,
+        inventory: saved.inventory,
+        trained: saved.trained ?? {},
+        snack: saved.snack ?? null
+      }));
+    }, { fill: WOOD, size: 26, textColor: PAPER }).container.setDepth(300);
   }
 }

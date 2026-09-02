@@ -58,6 +58,26 @@ export function panelImage(
 }
 
 // ------------------------------------------------------------------ TEXTO
+/**
+ * O CONTORNO DE TINTA, medido em em — uma regra, um lugar. Dois erros moravam
+ * espalhados por cinco arquivos:
+ *
+ * - PISO DE 4px: numa linha de 18px isso e 22% do em, e "BLOQUEIA 25% DOS
+ *   GOLPES" fechava sozinha num borrao vermelho no card da loja. Letra pequena
+ *   pede traco fino; e a letra grande que carrega contorno grosso de gibi.
+ * - TINTA SOBRE TINTA: com a letra JA de tinta o contorno so engorda o traco e
+ *   fecha o buraco do "O". O contador de ouro (44px, INK numa pilula dourada)
+ *   era uma mancha preta, e o nome da reliquia virava bolha. Letra escura leva
+ *   halo de PAPEL: descola do fundo sem comer a letra.
+ */
+export function inkStroke(t: Phaser.GameObjects.Text, size: number, color: number): void {
+  const dark = color === INK;
+  const weight = dark
+    ? Math.max(2, size * 0.09)
+    : size <= 22 ? Math.max(1.6, size * 0.11) : size * 0.15;
+  t.setStroke(css(dark ? PAPER : INK), weight);
+}
+
 export function label(
   scene: Phaser.Scene, x: number, y: number, txt: string,
   size: number, color = INK, strokeInk = false
@@ -68,7 +88,7 @@ export function label(
     color: css(color),
     fontStyle: '800'
   }).setOrigin(0.5);
-  if (strokeInk) t.setStroke(css(INK), Math.max(4, size * 0.16));
+  if (strokeInk) inkStroke(t, size, color);
   return t;
 }
 
@@ -141,7 +161,7 @@ export class ComicButton {
       color: css(o.textColor ?? WHITE),
       fontStyle: '800'
     }).setOrigin(0.5);
-    this.txt.setStroke(css(INK), Math.max(3, (o.size ?? h * 0.42) * 0.14));
+    inkStroke(this.txt, o.size ?? h * 0.42, o.textColor ?? WHITE);
 
     this.hit = scene.add.rectangle(0, this.LIFT / 2, w + OUTLINE * 2, h + this.LIFT + OUTLINE * 2, 0xffffff, 0);
     this.container.add([base, this.face, this.txt, this.hit]);
@@ -206,22 +226,45 @@ export function toast(scene: Phaser.Scene, txt: string, x: number, y: number, ba
   const t = scene.add.text(0, 0, txt, {
     fontFamily: FONT_DISPLAY, fontSize: '26px', color: css(WHITE), fontStyle: '800'
   }).setOrigin(0.5);
-  t.setStroke(css(INK), 5);
+  inkStroke(t, 26, WHITE);
   c.add([bg, t]);
   c.setScale(0.6);
   scene.tweens.add({ targets: c, scale: 1, duration: 180, ease: 'Back.easeOut' });
   scene.tweens.add({ targets: c, alpha: 0, y: y - 46, duration: 420, delay: 900, onComplete: () => c.destroy() });
 }
 
-/** Numero de dano que sobe e desaparece. */
+/**
+ * Numero de dano que sobe e desaparece.
+ *
+ * Com teto de numeros VIVOS por cena. Na wave 24 sao ~300 corpos batendo a cada
+ * 0,8s: sem teto o campo fica atras de uma nevoa de "-14" vermelhos e o jogador
+ * perde de vista a unica coisa que importa, a linha onde os dois exercitos se
+ * encostam. Doze numeros no ar comunicam "esta chovendo dano" igual a duzentos,
+ * e o 13o pedido e simplesmente descartado — o mesmo contrato do orcamento de
+ * particulas em art/fx.ts.
+ */
+const MAX_FLOATS = 12;
+const floats = new WeakMap<Phaser.Scene, { n: number }>();
+
 export function floatNumber(scene: Phaser.Scene, x: number, y: number, txt: string, color = WHITE, size = 30): void {
+  let s = floats.get(scene);
+  if (!s) {
+    s = { n: 0 };
+    floats.set(scene, s);
+    // o shutdown destroi os textos sem rodar os onComplete: zera o contador
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { s!.n = 0; });
+  }
+  if (s.n >= MAX_FLOATS) return;
+  s.n++;
   const t = scene.add.text(x, y, txt, {
     fontFamily: FONT_DISPLAY, fontSize: `${size}px`, color: css(color), fontStyle: '800'
   }).setOrigin(0.5).setDepth(4000);
-  t.setStroke(css(INK), size * 0.2);
+  // 'BLOQUEIO' saia como borrao: 20px de letra com 4px de contorno fecha tudo
+  inkStroke(t, size, color);
   scene.tweens.add({
     targets: t, y: y - 52, alpha: 0, scale: 1.25,
-    duration: 620, ease: 'Cubic.easeOut', onComplete: () => t.destroy()
+    duration: 620, ease: 'Cubic.easeOut',
+    onComplete: () => { s!.n = Math.max(0, s!.n - 1); t.destroy(); }
   });
 }
 

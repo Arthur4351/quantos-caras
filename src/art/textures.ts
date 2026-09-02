@@ -97,7 +97,87 @@ export function buildAllTextures(scene: Phaser.Scene): void {
   g.fillRect(48, 60, 86, 14);
   bake(g, 'bg_cloud', 176, 100, scene);
 
+  buildFxTextures(g, scene);
   g.destroy();
+}
+
+/**
+ * FX DE COMBATE. Tudo contornado a tinta como o resto da arte — uma particula
+ * sem linha preta parece de outro jogo colada em cima deste.
+ */
+function buildFxTextures(g: Phaser.GameObjects.Graphics, scene: Phaser.Scene): void {
+  // ---- estrela de impacto: o "POW" de gibi, o unico feedback que le a 40px ----
+  g.fillStyle(INK, 1);
+  spike(g, 40, 40, 38, 15, 10);
+  g.fillStyle(WHITE, 1);
+  spike(g, 40, 40, 30, 11, 10);
+  g.fillStyle(GOLD, 1);
+  spike(g, 40, 40, 17, 6, 10);
+  bake(g, 'fx_burst', 80, 80, scene);
+
+  // ---- arco de golpe: crescente grosso que sai do punho ----
+  g.fillStyle(INK, 1);
+  crescent(g, 6, 60, 56, 22, 44);
+  g.fillStyle(WHITE, 0.96);
+  crescent(g, 12, 54, 50, 21, 38);
+  bake(g, 'fx_slash', 120, 120, scene);
+
+  // ---- gota de sangue: pingo de tinta, nada realista ----
+  g.fillStyle(0x7c1220, 1);
+  g.fillCircle(14, 18, 12);
+  g.fillTriangle(6, 12, 22, 12, 14, 0);
+  g.fillStyle(RED, 1);
+  g.fillCircle(14, 18, 8);
+  g.fillTriangle(9, 13, 19, 13, 14, 4);
+  g.fillStyle(0xff8f7a, 0.9);
+  g.fillCircle(11, 15, 3);
+  bake(g, 'fx_blood', 28, 32, scene);
+
+  // ---- poca no chao: mancha irregular que fica de lembranca ----
+  g.fillStyle(0x7c1220, 1);
+  for (const [dx, dy, r] of [[26, 22, 20], [46, 18, 15], [62, 24, 12], [40, 30, 17], [16, 27, 11]]) {
+    g.fillEllipse(dx, dy, r * 2, r * 1.25);
+  }
+  g.fillStyle(RED, 1);
+  for (const [dx, dy, r] of [[28, 22, 14], [46, 19, 10], [58, 24, 7], [40, 28, 11]]) {
+    g.fillEllipse(dx, dy, r * 2, r * 1.2);
+  }
+  bake(g, 'fx_splat', 84, 48, scene);
+}
+
+/** Poligono de N pontas alternando raio externo/interno. */
+function spike(g: Phaser.GameObjects.Graphics, cx: number, cy: number, outer: number, inner: number, points: number): void {
+  g.beginPath();
+  for (let i = 0; i < points * 2; i++) {
+    const r = i % 2 === 0 ? outer : inner;
+    const a = (Math.PI * i) / points - Math.PI / 2;
+    const x = cx + Math.cos(a) * r;
+    const y = cy + Math.sin(a) * r;
+    if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+  }
+  g.closePath();
+  g.fillPath();
+}
+
+/** Crescente: arco grosso desenhado como leque de triangulos. */
+function crescent(g: Phaser.GameObjects.Graphics, x0: number, cy: number, radius: number, thickness: number, spread: number): void {
+  const steps = 26;
+  const half = Phaser.Math.DegToRad(spread);
+  for (let i = 0; i < steps; i++) {
+    const a1 = -half + (2 * half * i) / steps;
+    const a2 = -half + (2 * half * (i + 1)) / steps;
+    const inner = radius - thickness;
+    g.fillTriangle(
+      x0 + Math.cos(a1) * radius, cy + Math.sin(a1) * radius,
+      x0 + Math.cos(a2) * radius, cy + Math.sin(a2) * radius,
+      x0 + Math.cos(a1) * inner, cy + Math.sin(a1) * inner
+    );
+    g.fillTriangle(
+      x0 + Math.cos(a2) * radius, cy + Math.sin(a2) * radius,
+      x0 + Math.cos(a2) * inner, cy + Math.sin(a2) * inner,
+      x0 + Math.cos(a1) * inner, cy + Math.sin(a1) * inner
+    );
+  }
 }
 
 function star(g: Phaser.GameObjects.Graphics, cx: number, cy: number, outer: number, inner: number, fill: number): void {

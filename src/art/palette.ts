@@ -65,6 +65,48 @@ export const FAMILY_FALLBACK: FamilyPaint = { main: 0x9aa3ad, dark: 0x6d757e, li
 
 export function fam(name: string): FamilyPaint { return FAMILY[name] ?? FAMILY_FALLBACK; }
 
+/**
+ * O ELENCO FALAVA INGLES NUM JOGO ESCRITO EM PORTUGUES.
+ *
+ * A tela do diario dizia "O MESMO ELENCO PARA TODO MUNDO HOJE" e logo abaixo
+ * estampava CHEF · BONE KNIGHT · ASTRO sobre faixas ACTION, UNDEAD, SCIFI. A loja
+ * fazia o mesmo: "WARRIOR · TANK" numa carta cujo botao dizia CONTRATAR. Metade da
+ * interface num idioma, a outra metade no outro.
+ *
+ * `family` e `role` sao CHAVES — a paleta, a sinergia, as conquistas e o desenho do
+ * boneco (`dudeSpecs` le 'Tank'/'DPS'/'Support') dependem do valor em ingles. Entao
+ * o dado nao muda: traduz-se na hora de MOSTRAR, que e o unico lugar onde o idioma
+ * importa. Os nomes dos caras nao sao chave de nada (o `id` e), por isso foram
+ * traduzidos direto no `dudes.json`.
+ *
+ * Rotulos curtos de proposito: a carta da loja imprime "FAMILIA · FUNCAO" numa linha
+ * de 336px, e "TRABALHADORES · SUPORTE" nao caberia.
+ */
+export const FAMILY_PT: Record<string, string> = {
+  Warrior: 'GUERREIRO',
+  Undead: 'MORTO-VIVO',
+  Employed: 'OPERARIO',
+  Fantasy: 'FANTASIA',
+  SciFi: 'ESPACIAL',
+  Action: 'ACAO'
+};
+
+export const ROLE_PT: Record<string, string> = {
+  Tank: 'TANQUE',
+  DPS: 'DANO',
+  Support: 'SUPORTE'
+};
+
+/** Nome da familia em portugues, em caixa alta. Cai no proprio valor se for novo. */
+export function famLabel(family: string): string {
+  return FAMILY_PT[family] ?? String(family ?? '').toUpperCase();
+}
+
+/** Funcao de combate em portugues, em caixa alta. */
+export function roleLabel(role: string): string {
+  return ROLE_PT[role] ?? String(role ?? '').toUpperCase();
+}
+
 export interface RarityPaint { ring: number; css: string; }
 
 export const RARITY: Record<string, RarityPaint> = {

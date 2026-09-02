@@ -1,64 +1,55 @@
 import Phaser from 'phaser';
 import { DudeData } from '../types/DudeData';
-import { dudeKey } from '../art/textures';
+import { Fighter } from './Fighter';
+import { kitFrom } from '../systems/abilities';
+import { dudeKey, DUDE_W, DUDE_H, FOOT_ORIGIN_Y } from '../art/textures';
 
-export class Dude extends Phaser.GameObjects.Sprite {
-  dudeData: DudeData;
-  currentHp: number;
-  attackCooldown: number = 0;
+/**
+ * Altura na tela de um cara em combate. 1:1 com o canvas da textura: sem
+ * reescala o traco de tinta fica limpo, e o cara ocupa ~1/9 da tela como no
+ * How Many Dudes (a 108px ele era um bonequinho perdido no meio do rancho).
+ */
+export const DUDE_BATTLE_H = DUDE_H;
+/** Topo da arte no canvas do cara — o resto e folga para chapeu/cabelo. */
+const DUDE_CONTENT_TOP = 44;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, dudeData: DudeData) {
-    super(scene, x, y, scene.textures.exists(dudeKey(dudeData.id)) ? dudeKey(dudeData.id) : 'missing');
+export class Dude extends Fighter {
+  readonly dudeData: DudeData;
+  /** Quantas invocacoes este cara ja colocou no campo nesta batalha. */
+  summoned = 0;
+
+  constructor(scene: Phaser.Scene, x: number, y: number, dudeData: DudeData, hpBonus = 0) {
+    const key = scene.textures.exists(dudeKey(dudeData.id)) ? dudeKey(dudeData.id) : 'missing';
+    const s = dudeData.stats;
+    super(scene, x, y, key, {
+      team: 'dude',
+      hp: Math.floor(s.hp * (1 + hpBonus)),
+      atk: s.atk,
+      range: s.range,
+      attackSpeed: s.attackSpeed,
+      moveSpeed: s.moveSpeed,
+      kit: kitFrom(dudeData.ability),
+      visualHeight: DUDE_BATTLE_H,
+      sourceHeight: DUDE_H,
+      sourceWidth: DUDE_W,
+      bodyWidth: 100,
+      footOrigin: FOOT_ORIGIN_Y,
+      contentTop: DUDE_CONTENT_TOP,
+      barWidth: 84,
+      /**
+       * Sem barra de vida. No How Many Dudes o campo e feito de CARAS, nao de
+       * HUD: a leitura de dano vem do flash branco e de quem cai. A contagem do
+       * exercito vive num pill unico no rodape da cena de batalha.
+       */
+      bar: false
+    });
     this.dudeData = dudeData;
-    this.currentHp = dudeData.stats.hp;
-    scene.add.existing(this);
-    if (scene.physics && (scene.physics as any).add) {
-      scene.physics.add.existing(this);
-    }
-    this.setScale(0.72);
-    this.setOrigin(0.5, 0.94);
   }
 
-  takeDamage(n: number): void {
-    this.currentHp = Math.max(0, this.currentHp - n);
-    this.setTint(0xff0000);
-    if (this.scene && (this.scene as any).tweens) {
-      this.scene.tweens.add({
-        targets: this,
-        duration: 150,
-        onComplete: () => { if (this.active) this.clearTint(); }
-      });
-    } else if (this.scene) {
-      this.scene.time.delayedCall(150, () => { if (this.active) this.clearTint(); });
-    }
-    if (this.currentHp <= 0) {
-      this.setTint(0x555555);
-      if (this.scene && (this.scene as any).tweens) {
-        this.scene.tweens.add({ targets: this, alpha: 0.4, scale: 0.7, duration: 300 });
-      } else {
-        this.setAlpha(0.6);
-      }
-    } else {
-      // hit shake
-      if (this.scene && (this.scene as any).tweens) {
-        this.scene.tweens.add({ targets: this, x: this.x + 4, duration: 40, yoyo: true, repeat: 1 });
-      }
-    }
-  }
+  /** Compatibilidade com o codigo que ainda le currentHp. */
+  get currentHp(): number { return this.hp; }
+  set currentHp(v: number) { this.hp = v; }
 
-  isAlive(): boolean {
-    return this.currentHp > 0;
-  }
-
-  heal(amount: number): void {
-    this.currentHp = Math.min(this.dudeData.stats.hp, this.currentHp + amount);
-    if (this.isAlive()) {
-      this.clearTint();
-      this.setAlpha(1);
-    }
-  }
-
-  update(time: number, delta: number): void {
-    if (this.attackCooldown > 0) this.attackCooldown -= delta;
-  }
+  heal(amount: number): void { this.healBy(amount, true); }
+  takeDamage(n: number): void { this.hurt(n); }
 }

@@ -1,10 +1,25 @@
 import { RelicData } from '../types/RelicData';
 
+/**
+ * RELIQUIAS — cada uma TEM que fazer algo.
+ *
+ * Este arquivo tinha quinze reliquias e cinco efeitos. O jogador escolhia uma
+ * de tres a cada tres waves e, dois tercos das vezes, levava para casa uma carta
+ * decorativa: `magnet` e `dice` mexiam no reroll (que nao existe mais), `anvil`
+ * baixava um custo que ninguem cobra, `book` dizia "+10% XP (placeholder)" num
+ * jogo sem XP, e ampulheta/pena/luneta/coracao nao tinham UMA linha de codigo.
+ * Uma recompensa que nao recompensa e pior que nenhuma: ela gasta a decisao do
+ * jogador. Agora sao onze reliquias e onze efeitos, todos lidos em Battle.
+ */
 export class RelicSystem {
   constructor(private relics: RelicData[] = []) {}
 
+  private count_(id: string): number {
+    return this.relics.filter(r => r.id === id).length;
+  }
+
   goldBonus(): number {
-    return this.relics.filter(r => r.id === 'coinpurse').length * 2;
+    return this.count_('coinpurse') * 2;
   }
 
   hasRevive(): boolean {
@@ -20,24 +35,31 @@ export class RelicSystem {
   }
 
   attackBonus(): number {
-    return this.relics.filter(r => r.id === 'sword').length * 0.15;
+    return this.count_('sword') * 0.15;
   }
 
   defenseBonus(): number {
-    return this.relics.filter(r => r.id === 'shield').length * 0.20;
+    return this.count_('shield') * 0.2;
   }
 
-  hasFreeReroll(): boolean {
-    return this.relics.some(r => r.id === 'magnet');
+  /** Multiplicador de velocidade de ataque dos MEUS caras (ampulheta). */
+  attackSpeedBonus(): number {
+    return this.count_('hourglass') * 0.2;
   }
 
-  rerollCost(): number {
-    if (this.hasFreeReroll()) return 0;
-    return this.relics.some(r => r.id === 'dice') ? 1 : 2;
+  /** Multiplicador de velocidade de deslocamento (pena). */
+  moveSpeedBonus(): number {
+    return this.count_('feather') * 0.3;
   }
 
-  costReduction(): number {
-    return this.relics.filter(r => r.id === 'anvil').length * 1;
+  /** Alcance somado em pixels (luneta). */
+  rangeBonus(): number {
+    return this.count_('telescope') * 30;
+  }
+
+  /** Vida curada por segundo, para sempre (coracao). */
+  regenPerSecond(): number {
+    return this.count_('heart') * 1;
   }
 
   hasBomb(): boolean {
@@ -45,7 +67,7 @@ export class RelicSystem {
   }
 
   bombDamage(): number {
-    return this.hasBomb() ? 50 : 0;
+    return this.count_('bomb') * 50;
   }
 
   hasCrown(): boolean {

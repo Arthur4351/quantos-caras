@@ -1,17 +1,13 @@
 [
-  { "id": "meteor", "name": "Meteor", "description": "Causa 100 dano em área (clique)", "type": "active", "effect": { "target": "areaDamage", "value": 100 } },
-  { "id": "revive", "name": "Revive Token", "description": "Revive 1 dude com 50% HP 1x por batalha", "type": "passive", "effect": { "target": "revive", "value": 0.5 } },
-  { "id": "coinpurse", "name": "Coin Purse", "description": "+2 ouro por wave", "type": "passive", "effect": { "target": "goldPerWave", "value": 2 } },
-  { "id": "shield", "name": "Shield", "description": "+20% HP para todo time", "type": "passive", "effect": { "target": "defense", "value": 0.20 } },
-  { "id": "sword", "name": "Sword", "description": "+15% ATK para todo time", "type": "passive", "effect": { "target": "attack", "value": 0.15 } },
-  { "id": "hourglass", "name": "Hourglass", "description": "+20% Attack Speed", "type": "passive", "effect": { "target": "attackSpeed", "value": 0.20 } },
-  { "id": "magnet", "name": "Magnet", "description": "Reroll grátis (não custa 2g)", "type": "passive", "effect": { "target": "freeReroll", "value": 1 } },
-  { "id": "crown", "name": "Crown", "description": "Sinergia requer -1 dude (2→1, 4→3, 6→5)", "type": "passive", "effect": { "target": "synergyReduce", "value": 1 } },
-  { "id": "anvil", "name": "Anvil", "description": "Custo de dudes -1 (mín 1)", "type": "passive", "effect": { "target": "costReduce", "value": 1 } },
-  { "id": "feather", "name": "Feather", "description": "+30% MoveSpeed", "type": "passive", "effect": { "target": "moveSpeed", "value": 0.30 } },
-  { "id": "heart", "name": "Heart", "description": "Regen 1 HP/s para todos", "type": "passive", "effect": { "target": "regen", "value": 1 } },
-  { "id": "bomb", "name": "Bomb", "description": "50 dano em área a cada 10s", "type": "active", "effect": { "target": "bomb", "value": 50 } },
-  { "id": "dice", "name": "Dice", "description": "Reroll custa 1g ao invés de 2g", "type": "passive", "effect": { "target": "rerollCost", "value": 1 } },
-  { "id": "telescope", "name": "Telescope", "description": "+30 Range para todos", "type": "passive", "effect": { "target": "range", "value": 30 } },
-  { "id": "book", "name": "Book", "description": "+10% XP (placeholder)", "type": "passive", "effect": { "target": "xp", "value": 0.10 } }
+  { "id": "meteor", "name": "Meteoro", "description": "Clique no campo: 100 de dano em area", "type": "active", "effect": { "target": "areaDamage", "value": 100 } },
+  { "id": "bomb", "name": "Bomba", "description": "50 de dano em area a cada 10s, sozinha", "type": "active", "effect": { "target": "bomb", "value": 50 } },
+  { "id": "sword", "name": "Espada", "description": "+15% de ataque para todo o rancho", "type": "passive", "effect": { "target": "attack", "value": 0.15 } },
+  { "id": "shield", "name": "Escudo", "description": "-20% do dano que voce recebe", "type": "passive", "effect": { "target": "defense", "value": 0.2 } },
+  { "id": "hourglass", "name": "Ampulheta", "description": "+20% de velocidade de ataque", "type": "passive", "effect": { "target": "attackSpeed", "value": 0.2 } },
+  { "id": "feather", "name": "Pena", "description": "+30% de velocidade no campo", "type": "passive", "effect": { "target": "moveSpeed", "value": 0.3 } },
+  { "id": "telescope", "name": "Luneta", "description": "+30 de alcance para todos", "type": "passive", "effect": { "target": "range", "value": 30 } },
+  { "id": "heart", "name": "Coracao", "description": "Cura 1 de vida por segundo, sem parar", "type": "passive", "effect": { "target": "regen", "value": 1 } },
+  { "id": "revive", "name": "Amuleto", "description": "Levanta o rancho com 50% de vida, 1x por briga", "type": "passive", "effect": { "target": "revive", "value": 0.5 } },
+  { "id": "crown", "name": "Coroa", "description": "Sinergia de familia pede 1 cara menos", "type": "passive", "effect": { "target": "synergyReduce", "value": 1 } },
+  { "id": "coinpurse", "name": "Bolsa", "description": "+2 de ouro no fim de cada wave", "type": "passive", "effect": { "target": "goldPerWave", "value": 2 } }
 ]

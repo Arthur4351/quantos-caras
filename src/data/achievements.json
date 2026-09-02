@@ -1,14 +1,13 @@
 [
-  { "id": "first_win", "name": "First Win", "desc": "Vença wave 1" },
-  { "id": "first_blood", "name": "First Blood", "desc": "Derrote 10 inimigos" },
-  { "id": "collector", "name": "Collector", "desc": "Colete 5 dudes diferentes" },
-  { "id": "synergy_2", "name": "Sinergia", "desc": "Ative sinergia 2" },
-  { "id": "synergy_6", "name": "Exército", "desc": "Ative sinergia 6" },
-  { "id": "gorilla_slayer", "name": "Gorilla Slayer", "desc": "Derrote gorila wave 10" },
-  { "id": "relic_hunter", "name": "Relic Hunter", "desc": "Colete 5 relics" },
-  { "id": "trinket_master", "name": "Trinket Master", "desc": "Equipe 3 trinkets" },
-  { "id": "wave_50", "name": "Halfway", "desc": "Alcance wave 50" },
-  { "id": "god_slayer", "name": "God Slayer", "desc": "Derrote deus wave 100" },
-  { "id": "gold_star", "name": "Gold Star", "desc": "Wave sem perder dude" },
-  { "id": "daily_champ", "name": "Daily Champ", "desc": "Vença Daily Dude" }
+  { "id": "first_win", "name": "Primeira Vitoria", "desc": "Ganhe a sua primeira briga" },
+  { "id": "collector", "name": "Rancho Cheio", "desc": "Tenha os 5 tipos no rancho" },
+  { "id": "synergy_2", "name": "Sinergia", "desc": "Dois caras da mesma familia" },
+  { "id": "synergy_6", "name": "Familia Grande", "desc": "Seis caras da mesma familia" },
+  { "id": "army_50", "name": "Multidao", "desc": "Cinquenta caras no campo" },
+  { "id": "army_120", "name": "Quantos Caras?!", "desc": "Cento e vinte caras no campo" },
+  { "id": "gorilla_slayer", "name": "Matador de Gorila", "desc": "Derrube o chefe da wave 10" },
+  { "id": "relic_hunter", "name": "Colecionador", "desc": "Junte 5 reliquias numa run" },
+  { "id": "wave_50", "name": "Metade do Caminho", "desc": "Chegue na wave 50" },
+  { "id": "god_slayer", "name": "Matador de Deus", "desc": "Derrube o deus da wave 100" },
+  { "id": "gold_star", "name": "Estrela de Ouro", "desc": "Ganhe sem perder um cara" }
 ]

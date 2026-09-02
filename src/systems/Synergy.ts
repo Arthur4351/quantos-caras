@@ -1,7 +1,12 @@
 import families from '../data/families.json';
 
-export function calculateSynergyBonus(team: { family: string }[], family: string): number {
-  const count = team.filter(d => d.family === family).length;
+/**
+ * `slack` e a COROA: a reliquia promete "sinergia pede 1 cara menos" e agora
+ * cumpre. Some com a contagem do time em vez de mexer nos dados da familia, para
+ * que o efeito seja da RODADA e nao do jogo inteiro.
+ */
+export function calculateSynergyBonus(team: { family: string }[], family: string, slack = 0): number {
+  const count = team.filter(d => d.family === family).length + slack;
   const fam = (families as any)[family];
   if (!fam || !fam.synergy) return 0;
   let best = 0;
@@ -14,8 +19,8 @@ export function calculateSynergyBonus(team: { family: string }[], family: string
   return best;
 }
 
-export function calculateHpBonus(team: { family: string }[], family: string): number {
-  const count = team.filter(d => d.family === family).length;
+export function calculateHpBonus(team: { family: string }[], family: string, slack = 0): number {
+  const count = team.filter(d => d.family === family).length + slack;
   const fam = (families as any)[family];
   if (!fam || !fam.synergy) return 0;
   let best = 0;

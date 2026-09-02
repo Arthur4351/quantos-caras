@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { INK, PAPER, GOLD, WOOD, WHITE, FONT_DISPLAY, css } from '../art/palette';
 import { OUTLINE } from '../art/ink';
 import { shapeImage } from '../art/bakery';
+import { inkStroke } from '../art/UIKit';
 
 /**
  * HUD limpa no estilo How Many Dudes: duas pilulas ancoradas nos cantos, sem
@@ -50,7 +51,9 @@ export class HUD {
     const t = this.scene.add.text(tx, 0, txt, {
       fontFamily: FONT_DISPLAY, fontSize: `${size}px`, color: css(color), fontStyle: '800'
     }).setOrigin(0.5);
-    t.setStroke(css(INK), Math.max(4, size * 0.14));
+    // o contador de ouro e INK numa pilula dourada: contorno de tinta sobre tinta
+    // fazia dele uma mancha preta. A regra unica do kit resolve os dois casos.
+    inkStroke(t, size, color);
     c.add(t);
     return t;
   }
