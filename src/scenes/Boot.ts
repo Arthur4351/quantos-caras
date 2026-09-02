@@ -7,14 +7,17 @@ import wavesData from '../data/waves.json';
 export class Boot extends Phaser.Scene {
   constructor() { super('Boot'); }
   preload() {
-    // Audio - fail gracefully if files missing (handled via loaderror)
-    this.load.audio('bgm', 'assets/audio/bgm.mp3');
-    this.load.audio('hit', 'assets/audio/hit.wav');
-    this.load.audio('coin', 'assets/audio/coin.wav');
-    this.load.audio('meteor', 'assets/audio/meteor.wav');
-    this.load.on('loaderror', (file: any) => {
-      console.warn('loaderror', file.key, file.src);
-    });
+    /**
+     * SEM AUDIO — E DE PROPOSITO, NAO ESQUECIMENTO.
+     *
+     * `public/assets/audio/` tinha quatro arquivos de 44 bytes: cabecalho WAV vazio,
+     * zero amostras (e o `bgm.mp3` era um WAV com extensao errada). O navegador
+     * baixava os quatro, falhava em decodificar os quatro, e o console do jogo
+     * abria com OITO erros vermelhos mais quatro promessas rejeitadas — em toda
+     * carga, para tocar silencio. Todo `sound.play` do projeto ja passa por
+     * `cache.audio.exists`, entao nao carregar nada nao muda uma virgula do jogo:
+     * so cala o boot. Quando existir som de verdade, os `load.audio` voltam aqui.
+     */
   }
   create() {
     try {

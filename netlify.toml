@@ -1,0 +1,34 @@
+# Netlify serve o jogo na RAIZ do dominio; o GitHub Pages serve em /quantos-caras/.
+# O `base: './'` do vite.config.ts faz o mesmo build servir nos dois — nao existe
+# build separado por destino.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# O jogo e uma pagina unica sem rotas de cliente, mas o PWA registra um service
+# worker: qualquer caminho desconhecido volta para o index em vez de dar 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# O bundle e o CSS tem hash no nome, entao podem ser imutaveis. O index.html e o
+# service worker NAO: sem isto o jogador fica preso numa versao antiga do jogo.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
