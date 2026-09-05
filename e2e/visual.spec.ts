@@ -1,9 +1,30 @@
 import { test, expect } from '@playwright/test';
 
+/**
+ * O CELULAR E DEITADO, PORQUE O PROPRIO JOGO EXIGE ISSO.
+ *
+ * `src/styles.css:1102` acende o `#rotate-gate` em `max-width: 700px` +
+ * `orientation: portrait`: um retangulo OPACO `position:fixed; inset:0` com
+ * `z-index:40` que cobre o canvas e pede para virar o telefone. O portao esta
+ * certo — em 360px de largura o jogo renderiza pequeno demais para jogar.
+ *
+ * O TESTE E QUE ESTAVA ERRADO. Com `mobile` em 360x800 (retrato) as duas
+ * fotos-referencia do celular retratavam O CARTAO DO PORTAO, nao o jogo:
+ * `shop-mobile` e `battle-mobile` eram o mesmo desenho de telefone girando. E
+ * passavam com ZERO pixel de diferenca todas as rodadas — nao porque a arte do
+ * celular estava estavel, mas porque nenhuma arte do jogo aparecia ali. Dois dos
+ * seis baselines eram cegos, e o verde deles dizia o contrario.
+ *
+ * (Foi tambem o que sempre explicou por que so o `shop-tablet` piscava com o
+ * sorteio da loja: um cartao parado nao consegue distribuir outros caras.)
+ *
+ * 844x390 e o telefone DEITADO, que e a pose que o portao pede. Passa dos 700px,
+ * entao o portao dorme e a foto mostra a briga de verdade.
+ */
 const breakpoints = [
   { name: 'desktop', width: 1920, height: 1080 },
   { name: 'tablet', width: 768, height: 1024 },
-  { name: 'mobile', width: 360, height: 800 },
+  { name: 'mobile', width: 844, height: 390 },
 ];
 
 /**
@@ -211,7 +232,17 @@ for (const bp of breakpoints) {
       const shopX = box.x + box.width * 0.3;
       const shopY = box.y + box.height * 0.35;
       await page.mouse.click(shopX, shopY);
-      await page.waitForTimeout(500);
+      /**
+       * A COMPRA REINICIA A CENA, e o clique seguinte tem que esperar ela voltar.
+       *
+       * Eram 500ms fixos. Com a maquina carregada o `scene.restart` da loja levou
+       * mais que isso, o clique em "PRA CIMA DELES!" caiu num quadro em que o botao
+       * ainda nao existia, e o teste esperou 25s por uma Battle que ninguem pediu
+       * — `battle-desktop` reprovou com a loja perfeitamente saudavel na foto do
+       * erro. `waitScene` espera a cena ATIVA e o fade da camera TERMINADO, que e o
+       * unico sinal honesto de que a loja esta pronta para o proximo clique.
+       */
+      await waitScene(page, 'Shop');
       // click START BATTLE near bottom center
       const battleX = box.x + box.width / 2;
       const battleY = box.y + box.height * 0.94;
@@ -223,3 +254,42 @@ for (const bp of breakpoints) {
     await expect(page).toHaveScreenshot(`battle-${bp.name}.png`, BRIGA_VIVA);
   });
 }
+
+/**
+ * E O PORTAO DE RETRATO CONTINUA COBRADO — agora no lugar certo.
+ *
+ * Ele nao entra como setimo baseline de pixel: o cartao tem `card-pop` na entrada
+ * e `rotate-hint` em `infinite alternate`, e uma foto dele mede a animacao, nao a
+ * regra. O que importa e absoluto e da para afirmar direto: em retrato o portao
+ * COBRE a tela inteira, e deitando o telefone ele sai da frente.
+ *
+ * Este e o teste que impede a volta do defeito de cima. Se alguem mexer no media
+ * query — ou apontar um breakpoint de foto para o retrato outra vez — ele reprova
+ * ANTES de a arte do celular ser fotografada errada de novo.
+ */
+test('visual portao de retrato', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.locator('canvas')).toBeVisible({ timeout: ESPERA_CANVAS });
+
+  const portao = page.locator('#rotate-gate');
+  await expect(portao).toBeVisible();
+
+  // nao e um aviso no canto: e um portao, e cobre os 390x844 inteiros
+  const caixa = await portao.boundingBox();
+  expect(caixa).not.toBeNull();
+  expect(caixa!.width).toBe(390);
+  expect(caixa!.height).toBe(844);
+  expect(caixa!.x).toBe(0);
+  expect(caixa!.y).toBe(0);
+
+  // e o canvas continua VIVO embaixo (o portao cobre, nao esconde: `display:none`
+  // no `#game` daria um pai 0x0 para o ScaleManager)
+  const jogo = await page.locator('canvas').boundingBox();
+  expect(jogo!.width).toBeGreaterThan(0);
+  expect(jogo!.height).toBeGreaterThan(0);
+
+  // deitou o telefone, o portao sai da frente
+  await page.setViewportSize({ width: 844, height: 390 });
+  await expect(portao).toBeHidden();
+});

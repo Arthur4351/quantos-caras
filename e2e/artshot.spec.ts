@@ -116,16 +116,70 @@ test('artshot battle', async ({ page }) => {
   await canvasClick(page, 0.5, 0.94);
   await waitScene(page, 'Battle');
   await page.screenshot({ path: `${SHOTS}/03-battle.png` });
-  await page.waitForTimeout(3500);
-  await page.screenshot({ path: `${SHOTS}/03b-battle-meio.png` });
+
+  /**
+   * O KILL-CAM, FLAGRADO NO INSTANTE CERTO.
+   *
+   * Antes esta foto era "3,5s depois" e se chamava `battle-meio`. Na wave 1 a
+   * briga (dois caras contra seis pirralhos) acaba antes disso, e o que saia na
+   * foto era o FIM do kill-cam de `Battle.slowmoKill`: campo inteiro a 34% de
+   * alpha, camera colada, HUD fora do quadro e a vitima ja lancada para fora pelo
+   * `deathBlow`. Parecia bug e nao era — era a pose menos informativa possivel de
+   * um efeito que dura 2s.
+   *
+   * O sinal honesto de que o kill-cam comecou e `tweens.timeScale` cair abaixo de
+   * 1 (e a UNICA coisa que `slowmoKill` escala). Mas fotografar NESSE instante
+   * ainda e cedo: o holofote de `Battle.spotlight` leva 150ms de tween para
+   * apagar o campo, e a 0.3 de escala isso vira 500ms de relogio — a primeira
+   * versao desta foto saiu com todo mundo a meio caminho e a vitima indistinguivel
+   * dos defuntos. Entao a espera e pelo campo JA APAGADO: o ultimo cara vivo do
+   * rancho chegando aos 34% de alpha. Nesse ponto a vitima ainda esta acima de 70%
+   * (o `deathBlow` dela desce ate 0.55 ao longo dos 2s inteiros), e o "O ULTIMO!"
+   * segue no ar — e a pose que o efeito foi feito para mostrar.
+   */
+  await page.waitForFunction(() => {
+    const s = ((window as any).game?.scene?.getScenes(true) ?? [])
+      .find((sc: any) => sc.scene.key === 'Battle');
+    return !!s && s.tweens.timeScale < 1 && s.dudes.every((d: any) => d.alpha <= 0.35);
+  }, undefined, { timeout: 25000 });
+  await page.screenshot({ path: `${SHOTS}/03b-battle-ultimo.png` });
 });
 
+/**
+ * O CELULAR DEITADO — a unica pose de telefone em que ha jogo para fotografar.
+ *
+ * Em 390x844 (retrato) estas duas fotos NAO mostravam o jogo: `src/styles.css:1102`
+ * acende o `#rotate-gate` em `max-width:700px` + `orientation:portrait`, e ele e um
+ * retangulo opaco `inset:0` com `z-index:40`. As fotos `04-menu-mobile` e
+ * `05-shop-mobile` retratavam o cartao "VIRE O CELULAR" — o mesmo desenho duas
+ * vezes — enquanto o menu e a loja rodavam invisiveis embaixo. Toda a direcao de
+ * arte de celular era cega, e nada no nome dos arquivos dizia isso.
+ *
+ * 844x390 e o telefone na pose que o portao pede. O portao dorme e o que sai na
+ * foto e a tela de verdade, no aperto de verdade: 390px de altura e onde o piso de
+ * 22px de texto e o rodape da loja brigam por espaco.
+ */
 test('artshot mobile', async ({ page }) => {
-  await boot(page, 390, 844);
+  await boot(page, 844, 390);
   await page.screenshot({ path: `${SHOTS}/04-menu-mobile.png` });
   await canvasClick(page, 0.5, 0.807);
   await waitScene(page, 'Shop');
   await page.screenshot({ path: `${SHOTS}/05-shop-mobile.png` });
+});
+
+/**
+ * E O PORTAO, retratado de proposito e com o nome certo.
+ *
+ * E a unica tela do jogo que e HTML puro, sem canvas nenhum (ver `index.html:79`),
+ * entao ela nunca aparece nas outras doze fotos. Vale ter uma: e a PRIMEIRA coisa
+ * que um jogador de celular ve.
+ */
+test('artshot portao retrato', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.waitForSelector('#rotate-gate', { state: 'visible', timeout: ESPERA_CANVAS });
+  await page.waitForTimeout(900);   // deixa o `card-pop` da entrada terminar
+  await page.screenshot({ path: `${SHOTS}/04b-portao-retrato.png` });
 });
 
 /** Wave multipla de 3: a recompensa oferece RELIQUIA. */
