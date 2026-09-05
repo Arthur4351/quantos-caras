@@ -11,18 +11,77 @@
 </head>
 <body>
   <main id="app-shell" aria-label="Quantos Caras">
+    <!--
+      CENARIO DO SHELL: o que aparece na sobra em volta do canvas 16:9. Puro
+      enfeite (aria-hidden, pointer-events:none) e recortado pela moldura, entao
+      numa tela 16:9 exata simplesmente nao sobra espaco e nada disso incomoda.
+    -->
+    <div id="shell-scene" aria-hidden="true">
+      <div class="sun">
+        <div class="sun__rays"><i></i><i></i><i></i><i></i></div>
+        <div class="sun__disc"></div>
+      </div>
+      <div class="clouds">
+        <span class="cloud cloud--a"></span>
+        <span class="cloud cloud--b"></span>
+        <span class="cloud cloud--c"></span>
+        <span class="cloud cloud--d"></span>
+      </div>
+      <div class="birds"><span class="bird bird--a"></span><span class="bird bird--b"></span></div>
+      <div class="balloon">
+        <span class="balloon__bag"></span>
+        <span class="balloon__basket"></span>
+      </div>
+      <div class="ranch">
+        <span class="ranch__hill ranch__hill--far"></span>
+        <span class="ranch__hill ranch__hill--near"></span>
+        <div class="mill">
+          <span class="mill__tower"></span>
+          <div class="mill__blades"><i></i><i></i></div>
+          <span class="mill__hub"></span>
+        </div>
+        <div class="ranch__ground">
+          <div class="ranch__fence"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="tufts">
+            <span class="tuft"></span><span class="tuft"></span><span class="tuft"></span>
+            <span class="tuft"></span><span class="tuft"></span><span class="tuft"></span>
+            <span class="tuft"></span><span class="tuft"></span><span class="tuft"></span>
+            <span class="tuft"></span><span class="tuft"></span>
+          </div>
+          <span class="tumbleweed"></span>
+          <span class="yard-dude yard-dude--a"><i></i></span>
+          <span class="yard-dude yard-dude--b"><i></i></span>
+          <span class="yard-dude yard-dude--c"><i></i></span>
+        </div>
+      </div>
+    </div>
     <div id="game" aria-label="Jogo Quantos Caras"></div>
+    <div id="frame-furniture" aria-hidden="true">
+      <span class="rivet rivet--tl"></span><span class="rivet rivet--tr"></span>
+      <span class="rivet rivet--bl"></span><span class="rivet rivet--br"></span>
+      <span class="tape tape--tl"></span><span class="tape tape--br"></span>
+    </div>
     <section id="loading-screen" aria-live="polite">
       <div class="loading-card">
-        <div class="loading-card__mark" aria-hidden="true"></div>
+        <div class="loading-card__mark" aria-hidden="true"><i></i></div>
         <h1>QUANTOS<br/>CARAS?</h1>
-        <p>Preparando o rancho...</p>
-        <div class="loading-card__track" aria-hidden="true"></div>
+        <p>Preparando o rancho<span class="dots"><i>.</i><i>.</i><i>.</i></span></p>
+        <div class="parade" aria-hidden="true">
+          <div class="parade__line">
+            <span class="dude dude--1"></span><span class="dude dude--2"></span>
+            <span class="dude dude--3"></span><span class="dude dude--4"></span>
+            <span class="dude dude--5"></span><span class="dude dude--6"></span>
+          </div>
+        </div>
+        <div class="loading-card__track" aria-hidden="true"><span class="loading-card__fill"></span></div>
       </div>
     </section>
     <section id="rotate-gate" aria-live="polite">
       <div class="rotate-card">
-        <div class="rotate-card__phone" aria-hidden="true"></div>
+        <div class="rotate-card__stage" aria-hidden="true">
+          <span class="rotate-card__arc"></span>
+          <div class="rotate-card__phone"><i></i></div>
+        </div>
         <h2>VIRE O CELULAR</h2>
         <p>O rancho é largo. Deite o telefone para ver o campo inteiro.</p>
       </div>

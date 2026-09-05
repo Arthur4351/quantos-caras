@@ -61,13 +61,3 @@ export function attackPop(scene: Phaser.Scene, obj: Phaser.GameObjects.Image, di
     duration: 70, yoyo: true, ease: 'Quad.easeOut'
   });
 }
-
-/** Puff de poeira no pe. */
-export function dustPuff(scene: Phaser.Scene, x: number, y: number, scale = 1): void {
-  if (!scene.textures.exists('fx_puff')) return;
-  const p = scene.add.image(x, y, 'fx_puff').setScale(scale * 0.5).setAlpha(0.75).setDepth(-2);
-  scene.tweens.add({
-    targets: p, scale: scale * 1.15, alpha: 0, y: y - 12,
-    duration: 420, onComplete: () => p.destroy()
-  });
-}

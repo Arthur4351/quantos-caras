@@ -7,8 +7,8 @@ import { AchievementSystem } from '../systems/AchievementSystem';
 import { buildRanch } from '../art/Backdrop';
 import { ComicButton, label, panelImage, statPill, toast } from '../art/UIKit';
 import { addDudeImage, addShadow, idleBob } from '../art/DudeSprite';
-import { GOLD, GREEN, INK, ORANGE, PAPER, PAPER_DARK, PURPLE, RED, WOOD } from '../art/palette';
-import relics from '../data/relics.json';
+import { GOLD, GREEN, INK, ORANGE, PAPER, PAPER_DARK, PURPLE, RED, WOOD, fam, famLabel } from '../art/palette';
+import { draft, familyCount, relicFamily } from '../systems/RelicShop';
 import { WaveManager } from '../systems/WaveManager';
 import {
   countById, uniqueOwned, TrainedMap, trainLevel,
@@ -22,6 +22,8 @@ export class Reward extends Phaser.Scene {
   economy?: Economy;
   /** Vitoria sem nenhum cara caido — condicao da estrela de ouro. */
   noDeath = false;
+  /** Ouro catado no chao da briga pelo caixa. Ver `init`. */
+  private battleGold = 0;
   /** Treino do treinador: permanente, atravessa a run inteira. */
   private trained: TrainedMap = {};
   private selected = false;
@@ -43,6 +45,13 @@ export class Reward extends Phaser.Scene {
       ? data.economy
       : new Economy(data.economy?.gold ?? storage.load('save')?.gold ?? 6);
     this.noDeath = !!data.noDeath;
+    /**
+     * O TROCO DO CAIXA. Ouro catado DENTRO da briga (a moeda que ele arranca da
+     * cara do inimigo a cada quatro golpes) chega aqui como um numero cru, e nao
+     * como um bonus de planilha: se o caixa morreu no primeiro segundo, nao veio
+     * nada.
+     */
+    this.battleGold = Math.max(0, Math.round(data.bonusGold ?? 0));
     this.trained = data.trained ?? storage.load('save')?.trained ?? {};
     this.selected = false;
   }
@@ -60,6 +69,7 @@ export class Reward extends Phaser.Scene {
     rewardGold += this.dudesData.reduce(
       (sum: number, d: any) => sum + (d?.ability?.type === 'goldBonus' ? d.ability.value : 0), 0
     );
+    rewardGold += this.battleGold;
 
     if (!this.economy) this.economy = new Economy(storage.load('save')?.gold ?? 6);
     this.economy.add(rewardGold);
@@ -144,54 +154,90 @@ export class Reward extends Phaser.Scene {
     });
   }
 
+  /**
+   * A LOJA DE RELIQUIAS — a SEGUNDA loja do jogo, e ela nao pode ser a tela de
+   * recompensa com tres retangulos de papel em cima.
+   *
+   * Antes era exatamente isso: um painel de papel igual ao painel do premio logo
+   * acima, e tres cartas de papel iguais entre si. Tudo do mesmo material, na
+   * mesma cor, na mesma tela — o jogador nao sabia que tinha entrado numa loja, e
+   * as tres cartas nao diziam nada uma sobre a outra alem do texto miudo.
+   *
+   * Agora a banca e de MADEIRA, com prego no canto: uma barraca de feira pregada
+   * na frente do premio, material que nao existe em nenhum outro painel de UI do
+   * jogo. E cada carta anuncia PARA QUEM ela serve antes de dizer o que faz —
+   * reliquia geral em roxo dizendo TODO O RANCHO, reliquia de classe com moldura e
+   * faixa na cor da familia dizendo GUERREIRO · x7, com a contagem do seu proprio
+   * rancho dentro. Ver `RelicShop.draft`: a carta de classe so chega na mesa se
+   * voce tiver a familia, entao o `x7` nunca e `x0`.
+   */
   private buildRelicChoice(savedRelics: RelicData[]): void {
-    panelImage(this, 960, 390, 860, 118, { fill: PAPER, radius: 22, shadow: false }).setDepth(100);
-    label(this, 960, 350, 'ESCOLHA UMA RELIQUIA', 34, INK, false).setDepth(101);
-    label(this, 960, 392, 'UMA FERRAMENTA NOVA PARA O PROXIMO COMBATE', 22, INK).setDepth(101).setAlpha(0.7);
+    panelImage(this, 960, 384, 880, 106, { fill: WOOD, radius: 20 }, g => {
+      // os pregos da barraca: madeira pregada, nao papel apoiado
+      g.fillStyle(INK, 0.22);
+      g.fillCircle(-404, 0, 7);
+      g.fillCircle(404, 0, 7);
+    }, 'relicsign').setDepth(100);
+    label(this, 960, 362, 'LOJA DE RELIQUIAS', 36, PAPER, true).setDepth(101);
+    label(this, 960, 408, 'UMA SO — E ELA VALE A RUN INTEIRA', 22, PAPER).setDepth(101).setAlpha(0.9);
 
-    this.offer(savedRelics).forEach((relic, index) => {
-      const x = 960 + (index - 1) * 390;
-      const card = panelImage(this, x, 580, 330, 270, { fill: PAPER_DARK, radius: 24 }, g => {
-        g.fillStyle(PURPLE, 1);
-        g.fillRoundedRect(-145, -122, 290, 16, 8);
-      }, `reward${relic.id}`).setDepth(102);
-      statPill(this, x, 490, relic.type === 'active' ? 'ATIVA' : 'PASSIVA', ORANGE, 126, 34, INK).setDepth(104);
-      label(this, x, 545, relic.name.toUpperCase(), 32, INK, true).setDepth(104);
-      /**
-       * 17px numa carta de 330 e a MESMA falha que a loja tinha: a linha que
-       * explica o premio saia com 9 pixels de altura no meio de 110px de vazio
-       * embaixo dela. 24px em caixa alta (a voz do jogo inteiro), quebrando em
-       * ate tres linhas, usa o espaco que ja existia na carta.
-       */
-      label(this, x, 625, relic.description.toUpperCase(), 24, INK)
-        .setDepth(104).setWordWrapWidth(276).setAlign('center').setAlpha(0.9);
-      const hit = this.add.rectangle(x, 580, 330, 270, 0xffffff, 0).setInteractive({ useHandCursor: true }).setDepth(105);
-      hit.on('pointerover', () => card.setScale(1.04));
-      hit.on('pointerout', () => card.setScale(1));
-      hit.on('pointerup', () => {
-        if (this.selected) return;
-        this.selected = true;
-        storage.save('relics', [...savedRelics, relic]);
-        toast(this, `${relic.name.toUpperCase()} ADQUIRIDA`, 960, 820, false);
-        this.time.delayedCall(500, () => this.nextWave());
-      });
+    draft(savedRelics, this.dudesData).forEach((relic, index) => {
+      this.relicCard(relic, 960 + (index - 1) * 390, savedRelics);
     });
   }
 
   /**
-   * Tres reliquias distintas e sorteadas. Antes era `relics.slice(0, 3)`: as
-   * mesmas tres para sempre, e as outras doze eram inalcancaveis.
+   * UMA CARTA DA BANCA, inteira dentro de um container.
+   *
+   * O container nao e enfeite de arquitetura: antes o `pointerover` dava
+   * `setScale(1.04)` NA IMAGEM do painel, e o nome, a pilula e a descricao ficavam
+   * parados no lugar — a carta crescia por baixo do proprio texto. Com tudo num
+   * container, a carta cresce inteira, como um objeto que voce pegou na mao.
+   *
+   * A PILULA E O CABECALHO DA CARTA, e ela e o unico lugar onde a cor aparece.
+   * A primeira versao desta tela tinha TAMBEM uma faixa colorida de 16px no alto do
+   * papel, herdada da carta antiga: com a pilula ja pintada na cor da familia, a
+   * faixa virou uma segunda barra da mesma cor a tres pixels da primeira, e as duas
+   * juntas nao pareciam duas coisas — pareciam uma coisa quebrada. A faixa saiu, a
+   * pilula subiu para o lugar dela, e a moldura da familia continua dizendo de
+   * longe qual carta e de classe.
    */
-  private offer(owned: RelicData[]): RelicData[] {
-    const ownedIds = new Set(owned.map(r => r.id));
-    const pool = (relics as RelicData[]).filter(r => !ownedIds.has(r.id));
-    const source = pool.length >= 3 ? pool : [...(relics as RelicData[])];
-    const bag = [...source];
-    const out: RelicData[] = [];
-    while (out.length < 3 && bag.length) {
-      out.push(bag.splice(Math.floor(Math.random() * bag.length), 1)[0]);
+  private relicCard(relic: RelicData, x: number, savedRelics: RelicData[]): void {
+    const family = relicFamily(relic);
+    const paint = family ? fam(family).main : PURPLE;
+    const mine = family ? familyCount(this.dudesData, family) : 0;
+
+    const card = this.add.container(x, 580).setDepth(102);
+    const face = panelImage(this, 0, 0, 330, 270, { fill: PAPER_DARK, radius: 24 }, g => {
+      if (!family) return;
+      // moldura na cor da familia — le-se de longe qual carta e de classe
+      g.lineStyle(6, paint, 1);
+      g.strokeRoundedRect(-152, -129, 304, 258, 18);
+    }, `rel${family ? paint : 'gen'}`);
+    card.add([
+      face,
+      statPill(this, 0, -96, family ? `${famLabel(family)} · x${mine}` : 'TODO O RANCHO',
+        paint, 296, 40, family ? INK : PAPER),
+      label(this, 0, -34, relic.name.toUpperCase(), 32, INK, true),
+      label(this, 0, 36, relic.description.toUpperCase(), 23, INK)
+        .setWordWrapWidth(282).setAlign('center').setAlpha(0.9)
+    ]);
+    // PASSIVA em dezesseis das dezessete cartas seria ruido; a excecao e que avisa
+    if (relic.type === 'active') {
+      card.add(statPill(this, 0, 104, 'ATIVA · CLIQUE NA BRIGA', ORANGE, 304, 40, INK));
     }
-    return out;
+
+    const hit = this.add.rectangle(x, 580, 330, 270, 0xffffff, 0)
+      .setInteractive({ useHandCursor: true }).setDepth(105);
+    hit.on('pointerover', () => card.setScale(1.05));
+    hit.on('pointerout', () => card.setScale(1));
+    hit.on('pointerup', () => {
+      if (this.selected) return;
+      this.selected = true;
+      storage.save('relics', [...savedRelics, relic]);
+      toast(this, `${relic.name.toUpperCase()} ADQUIRIDA`, 960, 820, false);
+      this.time.delayedCall(500, () => this.nextWave());
+    });
   }
 
   private buildContinue(): void {

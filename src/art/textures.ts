@@ -3,7 +3,7 @@ import dudesJson from '../data/dudes.json';
 import { specFor } from './dudeSpecs';
 import { drawDude, DUDE_W, DUDE_H, FOOT_ORIGIN_Y } from './drawDude';
 import { ENEMY_ART } from './drawEnemy';
-import { INK, WHITE, GOLD, GOLD_DARK, RED } from './palette';
+import { INK, WHITE, GOLD, GOLD_DARK, RED, ORANGE, GREEN, PURPLE } from './palette';
 import { bake, flatCircle, inkCircle, inkTri } from './ink';
 
 export { FOOT_ORIGIN_Y, DUDE_W, DUDE_H };
@@ -143,6 +143,145 @@ function buildFxTextures(g: Phaser.GameObjects.Graphics, scene: Phaser.Scene): v
     g.fillEllipse(dx, dy, r * 2, r * 1.2);
   }
   bake(g, 'fx_splat', 84, 48, scene);
+
+  buildTraitTextures(g, scene);
+}
+
+/**
+ * O VOCABULARIO DOS TRACOS DE ASSINATURA.
+ *
+ * Cada traco dos 42 caras tem que se ANUNCIAR na tela — senao o jogador ve
+ * numeros diferentes e conclui que todo mundo faz a mesma coisa. Oito simbolos
+ * chapados cobrem o elenco inteiro: fogo, gelo, escudo, raiz, cruz de cura,
+ * caveira de maldicao, nota de musica e zigue-zague de energia. Todos contornados
+ * a tinta e legiveis a 24px, que e o tamanho que eles tem no meio da multidao.
+ */
+function buildTraitTextures(g: Phaser.GameObjects.Graphics, scene: Phaser.Scene): void {
+  // ---- LINGUA DE FOGO: tres bicos de chama, do escuro pro claro ----
+  flame(g, 24, 46, 22, 44, INK);
+  flame(g, 24, 44, 17, 36, RED);
+  flame(g, 24, 42, 12, 26, ORANGE);
+  flame(g, 24, 40, 6, 15, GOLD);
+  bake(g, 'fx_flame', 48, 56, scene);
+
+  // ---- CRISTAL DE GELO: losango de seis pontas, sem curva nenhuma ----
+  shard(g, 24, 24, 23, INK);
+  shard(g, 24, 24, 17, 0x2f8fd6);
+  shard(g, 24, 24, 10, 0xcdf2ff);
+  bake(g, 'fx_ice', 48, 48, scene);
+
+  // ---- BROQUEL: escudinho de ponta, o sinal de absorcao ----
+  shield(g, 26, 4, 44, INK, 0);
+  shield(g, 26, 9, 34, 0x2f8fd6, 0);
+  shield(g, 26, 13, 24, 0xcdf2ff, 0);
+  bake(g, 'fx_shield', 52, 56, scene);
+
+  // ---- RAIZ: garra de tres espinhos saindo do chao ----
+  g.fillStyle(INK, 1);
+  thorn(g, 26, 44, -16, -40, 11);
+  thorn(g, 26, 44, 0, -46, 12);
+  thorn(g, 26, 44, 16, -40, 11);
+  g.fillStyle(0x4d9d27, 1);
+  thorn(g, 26, 42, -15, -34, 7);
+  thorn(g, 26, 42, 0, -39, 8);
+  thorn(g, 26, 42, 15, -34, 7);
+  bake(g, 'fx_root', 52, 52, scene);
+
+  // ---- CRUZ DE CURA ----
+  g.fillStyle(INK, 1);
+  g.fillRoundedRect(2, 15, 44, 18, 6);
+  g.fillRoundedRect(15, 2, 18, 44, 6);
+  g.fillStyle(GREEN, 1);
+  g.fillRoundedRect(6, 19, 36, 10, 4);
+  g.fillRoundedRect(19, 6, 10, 36, 4);
+  bake(g, 'fx_plus', 48, 48, scene);
+
+  // ---- CAVEIRA DE MALDICAO: silhueta, dois furos e dentes ----
+  g.fillStyle(INK, 1);
+  g.fillRoundedRect(3, 3, 42, 38, 15);
+  g.fillRoundedRect(13, 36, 22, 12, 5);
+  g.fillStyle(PURPLE, 1);
+  g.fillRoundedRect(7, 7, 34, 31, 12);
+  g.fillRoundedRect(16, 34, 16, 10, 4);
+  g.fillStyle(INK, 1);
+  g.fillEllipse(17, 21, 12, 14);
+  g.fillEllipse(31, 21, 12, 14);
+  g.fillRect(21, 38, 3, 6);
+  g.fillRect(26, 38, 3, 6);
+  bake(g, 'fx_skull', 48, 50, scene);
+
+  // ---- NOTA DE MUSICA: cabeca e haste, nada mais ----
+  g.fillStyle(INK, 1);
+  g.fillEllipse(17, 39, 30, 24);
+  g.fillRect(28, 4, 10, 36);
+  g.fillRect(28, 4, 18, 10);
+  g.fillStyle(GOLD, 1);
+  g.fillEllipse(17, 39, 20, 15);
+  g.fillRect(30, 7, 5, 30);
+  bake(g, 'fx_note', 48, 52, scene);
+
+  // ---- ZIGUE-ZAGUE: energia, virus, laser ----
+  g.fillStyle(INK, 1);
+  zig(g, 1);
+  g.fillStyle(0x7ef0ff, 1);
+  zig(g, 0.72);
+  bake(g, 'fx_zap', 40, 64, scene);
+}
+
+/** Chama: bico curvo desenhado como leque de triangulos a partir da base. */
+function flame(g: Phaser.GameObjects.Graphics, cx: number, baseY: number, w: number, h: number, fill: number): void {
+  g.fillStyle(fill, 1);
+  const steps = 10;
+  let px = cx - w, py = baseY;
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps;
+    // largura fecha em bico; o topo cai um pouco pra um lado (chama nunca e reta)
+    const half = w * (1 - t) * (1 - t * 0.35);
+    const y = baseY - h * t;
+    const x = cx - half + Math.sin(t * Math.PI) * w * 0.22;
+    g.fillTriangle(px, py, x, y, cx + half + Math.sin(t * Math.PI) * w * 0.22, y);
+    g.fillTriangle(px, py, cx + w * (1 - (i - 1) / steps), py, cx + half, y);
+    px = x; py = y;
+  }
+}
+
+/** Cristal de seis pontas — duas barras cruzadas e um losango no meio. */
+function shard(g: Phaser.GameObjects.Graphics, cx: number, cy: number, r: number, fill: number): void {
+  g.fillStyle(fill, 1);
+  for (let i = 0; i < 3; i++) {
+    const a = (Math.PI / 3) * i;
+    const dx = Math.cos(a) * r, dy = Math.sin(a) * r;
+    const nx = -Math.sin(a) * r * 0.26, ny = Math.cos(a) * r * 0.26;
+    g.fillTriangle(cx + dx, cy + dy, cx + nx, cy + ny, cx - nx, cy - ny);
+    g.fillTriangle(cx - dx, cy - dy, cx + nx, cy + ny, cx - nx, cy - ny);
+  }
+}
+
+/** Escudo de ponta: retangulo arredondado no topo + bico embaixo. */
+function shield(g: Phaser.GameObjects.Graphics, cx: number, top: number, w: number, fill: number, _o: number): void {
+  const h = w * 0.82;
+  g.fillStyle(fill, 1);
+  g.fillRoundedRect(cx - w / 2, top, w, h * 0.72, w * 0.18);
+  g.fillTriangle(cx - w / 2, top + h * 0.6, cx + w / 2, top + h * 0.6, cx, top + h * 1.16);
+}
+
+/** Espinho: triangulo fino da base ate a ponta. */
+function thorn(g: Phaser.GameObjects.Graphics, x: number, y: number, dx: number, dy: number, w: number): void {
+  g.fillTriangle(x - w / 2, y, x + w / 2, y, x + dx, y + dy);
+}
+
+/** Raio em zigue-zague. `k` encolhe o poligono no centro para virar contorno. */
+function zig(g: Phaser.GameObjects.Graphics, k: number): void {
+  const pts = [[27, 2], [8, 33], [19, 33], [13, 62], [32, 27], [21, 27]];
+  const cx = 20, cy = 32;
+  g.beginPath();
+  for (let i = 0; i < pts.length; i++) {
+    const x = cx + (pts[i][0] - cx) * k;
+    const y = cy + (pts[i][1] - cy) * k;
+    if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+  }
+  g.closePath();
+  g.fillPath();
 }
 
 /** Poligono de N pontas alternando raio externo/interno. */

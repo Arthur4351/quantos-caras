@@ -44,6 +44,15 @@ export class Dude extends Fighter {
       bar: false
     });
     this.dudeData = dudeData;
+    /**
+     * A UNICA LINHA QUE LIGA UM CARA AO TRACO DELE.
+     *
+     * O motor de combate consulta `traits.ts` por este id. Nao e o Fighter que
+     * conhece o traco (isso fecharia ciclo entre entidade e sistema): e o id,
+     * cru, e o motor faz a ponte. Se um id do dudes.json nao tiver traco na
+     * tabela, o cara simplesmente luta com os numeros do Kit — nada quebra.
+     */
+    this.traitId = dudeData.id;
   }
 
   /** Compatibilidade com o codigo que ainda le currentHp. */

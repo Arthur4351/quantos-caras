@@ -3,7 +3,7 @@ import { Economy } from '../systems/Economy';
 import { HUD } from '../ui/HUD';
 import { storage } from '../utils/storage';
 import { DudeData } from '../types/DudeData';
-import { abilityBlurb } from '../systems/abilities';
+import { traitFor } from '../systems/traits';
 import { buildRanch } from '../art/Backdrop';
 import { ComicButton, label, statPill, toast, panelImage, shade, floatNumber } from '../art/UIKit';
 import { addDudeImage, addShadow, idleBob } from '../art/DudeSprite';
@@ -33,10 +33,17 @@ import {
  * CARA DO LANCHE (buff de uma batalha).
  */
 
-/** Tres cartas grandes: a decisao da rodada tem que dominar a tela. */
+/**
+ * Tres cartas grandes: a decisao da rodada tem que dominar a tela.
+ *
+ * A carta cresceu 26px para caber a PLACA DO GOLPE (nome do traco + a frase que
+ * explica o que ele faz). Nao ha folga para mais: a pilula do lanche fecha em
+ * y=267 e a linha dos currais abre em y=744, entao a carta vive em 272..738 e
+ * qualquer pixel a mais bate num dos dois.
+ */
 const CARD_W = 336;
-const CARD_H = 440;
-const CARD_Y = 498;
+const CARD_H = 466;
+const CARD_Y = 505;
 const CARD_STEP = CARD_W + 46;
 
 /** Os cinco currais, sempre visiveis — o teto de tipos e a regra do jogo. */
@@ -250,38 +257,81 @@ export class Shop extends Phaser.Scene {
     c.add(panelImage(this, 0, 0, CARD_W, CARD_H, { fill: PAPER, radius: 28 }, g => {
       g.lineStyle(7, ring, 1);
       g.strokeRoundedRect(-CARD_W / 2 + 9, -H + 9, CARD_W - 18, CARD_H - 18, 21);
+      // faixa de cima: familia e funcao
       g.fillStyle(INK, 1);
       g.fillRoundedRect(-CARD_W / 2 + 10, -H + 8, CARD_W - 20, 66, 20);
       g.fillStyle(paint.main, 1);
       g.fillRoundedRect(-CARD_W / 2 + 14, -H + 12, CARD_W - 28, 58, 16);
       g.fillStyle(WHITE, 0.26);
       g.fillRoundedRect(-CARD_W / 2 + 20, -H + 18, CARD_W - 40, 17, 8);
-    }, `draft${paint.main}${ring}`));
+      /**
+       * A PLACA DO GOLPE — a metade de baixo da carta, e o motivo dela ter crescido.
+       *
+       * Duas tintas de proposito. O NOME do traco vai na cor da familia, porque e
+       * ele que tem de ser visto do outro lado da mesa; a FRASE que explica vai
+       * numa tira de creme, porque corpo de texto em cima de cor saturada fecha num
+       * borrao (a mesma licao da linha de habilidade, ver mais abaixo). Cor no
+       * PREENCHIMENTO, tinta preta na letra que se le.
+       */
+      g.fillStyle(INK, 1);
+      g.fillRoundedRect(-153, 78, 306, 100, 20);
+      g.fillStyle(paint.main, 1);
+      g.fillRoundedRect(-149, 82, 298, 92, 16);
+      g.fillStyle(PAPER, 1);
+      g.fillRoundedRect(-144, 118, 288, 52, 13);
+    }, `draft2${paint.main}${ring}`));
 
     c.add(label(this, 0, -H + 41, `${famLabel(d.family)} · ${roleLabel(d.role)}`, 25, WHITE, true));
-    c.add(addShadow(this, 0, 40, 124));
-    const img = addDudeImage(this, 0, 40, d.id, 196);
+
+    /**
+     * As pilulas de HP/ATK subiram para debaixo da faixa e o boneco passou a ser
+     * desenhado DEPOIS delas — ou seja, por cima. Com 42 chapeus diferentes (o do
+     * cowboy tem aba, o do bruxo tem bico) nao existe altura em que a cabeca de
+     * todos eles passe livre; entao em vez de brigar por 4px, quem encosta na
+     * pilula encosta NA FRENTE dela, e vira profundidade em vez de defeito.
+     */
+    c.add(statPill(this, -88, -138, `${d.stats.hp} HP`, GREEN, 124, 36, WHITE));
+    c.add(statPill(this, 88, -138, `${d.stats.atk} ATK`, RED, 124, 36, WHITE));
+
+    c.add(addShadow(this, 0, 20, 100));
+    const img = addDudeImage(this, 0, 20, d.id, 168);
     idleBob(this, img, 5, 1000);
     c.add(img);
 
-    c.add(label(this, 0, 82, d.name.toUpperCase(), 34, INK));
-    const blurb = abilityBlurb(d.ability);
+    c.add(label(this, 0, 56, d.name.toUpperCase(), 34, INK));
+
     /**
-     * 18px era 0.9% da largura do canvas: num telefone deitado (667px de tela) a
-     * linha que EXPLICA a carta saia com 6px de altura. 22px com quebra de linha
-     * de seguranca — a carta tem 296px uteis e a maior habilidade cabe rente.
+     * O QUE A CARTA VENDE AGORA E O TRACO, NAO O NUMERO.
      *
-     * E ela e TINTA CRUA, sem contorno. Pintada com a cor de destaque da carta
-     * (vermelho no guerreiro, roxo no morto-vivo) ela era um miolo saturado dentro
-     * de um halo escuro: a 22px os dois se encontram e "BLOQUEIA 25% DOS GOLPES"
-     * fecha num borrao colorido. A cor de destaque manda na faixa do papel e nas
-     * pilulas; a linha que se LE em cima do papel e preto sobre creme, e ponto.
+     * Antes aqui estava `abilityBlurb`, que dizia "+18% DE DANO" — a mesma frase
+     * com outro numero em treze caras diferentes. Escolher entre o samurai e o
+     * cavaleiro era escolher entre duas porcentagens, e o jogador nao tinha como
+     * saber, na hora que importa, que um corta em linha reta e o outro jura
+     * vinganca. Agora a carta estampa o NOME do golpe e a frase dele (ver
+     * `systems/traits.ts`); os numeros do Kit continuam la, nas pilulas.
+     *
+     * `traitFor` nunca falha aqui: o teste de unidade trava um traco para cada id
+     * do `dudes.json`, e toda carta desta cena sai de lá.
      */
-    if (blurb) {
-      c.add(label(this, 0, 112, blurb, 22, INK).setWordWrapWidth(300).setAlign('center').setAlpha(0.82));
+    const trait = traitFor(d.id);
+    if (trait) {
+      c.add(label(this, 0, 100, trait.name, 25, WHITE, true));
+      /**
+       * 22px E O PISO DO CORPO DE TEXTO DO JOGO, e esta linha e a que mais precisa
+       * dele: e ela que EXPLICA a carta. A 18px ela dava 0.9% da largura do canvas
+       * — num telefone deitado de 667px, seis pixels de altura para a unica frase
+       * que diz o que o cara faz.
+       *
+       * A tira de creme tem 52px (y 118..170) e o espaco abaixo esta tomado pela
+       * pilula de RECRUTAR (abre em 181), entao a folga vem do entrelinha e nao do
+       * desenho: -5 fecha as duas linhas em 43px e sobram 9px dentro do creme.
+       * Medido na cena rodando contra as 42 frases da tabela, uma por uma: nenhuma
+       * passa de duas linhas na largura de 282 — ver `blurb` em `systems/traits.ts`.
+       */
+      c.add(label(this, 0, 144, trait.blurb.toUpperCase(), 22, INK)
+        .setWordWrapWidth(282).setAlign('center').setLineSpacing(-5).setAlpha(0.88));
     }
-    c.add(statPill(this, -78, 150, `${d.stats.hp} HP`, GREEN, 132, 38, WHITE));
-    c.add(statPill(this, 78, 150, `${d.stats.atk} ATK`, RED, 132, 38, WHITE));
+
     // a carta diz na cara o que ela ENTREGA: tipo novo, um pacote de copias ou,
     // no limite de corpos, um nivel de treino
     const pack = copiesFor(this.inventory, this.wave);
@@ -289,11 +339,37 @@ export class Shop extends Phaser.Scene {
       : pack === 0 ? `RANCHO LOTADO  ·  TREINA ★`
       : pack > 1 ? `+${pack} COPIAS  ·  FICA x${owned + pack}`
       : `+1 COPIA  ·  FICA x${owned + 1}`;
-    c.add(statPill(this, 0, 192, deal, owned ? GOLD : GREEN, 276, 44, owned ? INK : WHITE));
+    c.add(statPill(this, 0, 202, deal, owned ? GOLD : GREEN, 276, 42, owned ? INK : WHITE));
 
+    /**
+     * O HOVER LEVANTA A CARTA — e de proposito que ele passa por cima dos vizinhos.
+     *
+     * A carta ocupa 272..738 e vive entre a pilula do lanche (fecha em 267) e a
+     * linha dos currais (abre em 741). Crescer 5% joga as bordas para 261 e 749,
+     * ou seja, 10px em cima de cada vizinho. Encolher o hover para 2% resolveria a
+     * conta e mataria o gesto: a carta e A decisao da rodada, ela tem de pular na
+     * mao. Como o Container esta em depth 100 e os dois vizinhos em 81 e 62, o
+     * excesso desenha SOBRE eles — le-se como papel saindo da mesa, nao como
+     * colisao, e passa no instante em que o ponteiro sai.
+     *
+     * E tween, nao `setScale`: 90ms de `Back.easeOut` com uma inclinacao de 1.2
+     * grau. O salto seco anterior nao tinha peso nenhum.
+     */
     const hit = this.add.rectangle(0, 0, CARD_W, CARD_H, 0xffffff, 0).setInteractive({ useHandCursor: true });
-    hit.on('pointerover', () => { if (!this.picked) c.setScale(1.045); });
-    hit.on('pointerout', () => { if (!this.picked) c.setScale(1); });
+    const lift = (on: boolean) => {
+      if (this.picked) return;
+      c.setDepth(on ? 110 : 100);
+      this.tweens.killTweensOf(c);
+      this.tweens.add({
+        targets: c,
+        scale: on ? 1.05 : 1,
+        angle: on ? (index === 1 ? 0 : (index === 0 ? -1.2 : 1.2)) : 0,
+        duration: on ? 130 : 90,
+        ease: on ? 'Back.easeOut' : 'Quad.easeOut'
+      });
+    };
+    hit.on('pointerover', () => lift(true));
+    hit.on('pointerout', () => lift(false));
     hit.on('pointerup', () => this.pick(index));
     c.add(hit);
     this.hits.push(hit);
@@ -347,6 +423,17 @@ export class Shop extends Phaser.Scene {
      */
     this.refreshBattleButton();
 
+    /**
+     * MATA O HOVER ANTES DE ANIMAR A ESCOLHA.
+     *
+     * O clique cai em cima do tween de `lift`, que tem 130ms e mexe em `scale` e
+     * `angle` da MESMA carta que vai voar. Dois tweens na mesma propriedade e o
+     * bug de sempre: o segundo captura o valor inicial na criacao e reescreve o
+     * que o primeiro escreveu, frame a frame — a carta escolhida ficaria tremendo
+     * entre 1.05 e 1.12 e pousaria no curral torta. Limpa e endireita primeiro.
+     */
+    this.cards.forEach(card => { this.tweens.killTweensOf(card); card.setAngle(0); });
+
     this.cards.forEach((card, i) => {
       if (i === index) return;
       this.tweens.add({ targets: card, alpha: 0.16, scale: 0.88, duration: 260, ease: 'Quad.easeOut' });
@@ -391,7 +478,7 @@ export class Shop extends Phaser.Scene {
       : this.inventory.length >= MAX_ARMY
         ? `SEU RANCHO  ·  CAMPO LOTADO EM ${MAX_ARMY} CARAS`
         : `CLIQUE NUM CURRAL  ·  +1 CARA POR ${price} OURO`;
-    this.penLine = label(this, 960, PEN_Y - PEN_H / 2 - 30, txt, 27, PAPER, true).setDepth(62);
+    this.penLine = label(this, 960, PEN_Y - PEN_H / 2 - 24, txt, 27, PAPER, true).setDepth(62);
   }
 
   /** Cinco currais fixos: o teto de tipos e a primeira coisa que se le na tela. */

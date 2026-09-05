@@ -7,6 +7,7 @@ import { Enemy } from '../entities/Enemy';
 import { Fighter } from '../entities/Fighter';
 import { Projectile } from '../entities/Projectile';
 import { RelicSystem } from '../systems/RelicSystem';
+import { RelicRites, RiteBody, riteConfig } from '../systems/RelicRites';
 import { battleStats, TrainedMap } from '../systems/RunState';
 import { storage } from '../utils/storage';
 import { buildRanch } from '../art/Backdrop';
@@ -55,6 +56,8 @@ export class Battle extends Phaser.Scene {
   waveManager!: WaveManager;
   combat?: CombatSystem;
   relicSystem!: RelicSystem;
+  /** Os rituais das reliquias de CLASSE. Ver `systems/RelicRites.ts`. */
+  private rites?: RelicRites;
   wave = 1;
   dudesData: DudeData[] = [];
   battleActive = false;
@@ -88,6 +91,7 @@ export class Battle extends Phaser.Scene {
     this.enemies = [];
     this.projectiles = [];
     this.combat = undefined;
+    this.rites = undefined;
     this.battleActive = false;
     this.hasRevived = false;
     this.armyRoster = undefined;
@@ -133,7 +137,7 @@ export class Battle extends Phaser.Scene {
       enemyDmgMult: 1 - this.relicSystem.defenseBonus(),
       arena: this.arena,
       hooks: {
-        onRanged: (a, t, dmg) => this.projectiles.push(new Projectile(this, a.x, a.y - a.visualHeight * 0.5, t, dmg)),
+        onRanged: (a, t, dmg, tint, onHit) => this.fireBolt(a, t, dmg, tint, onHit),
         onSummon: s => this.tintSummon(s),
         onFinalBlow: (victim, won) => this.slowmoKill(victim, won),
         onEnd: won => this.finishBattle(won)
@@ -141,9 +145,30 @@ export class Battle extends Phaser.Scene {
     });
 
     this.buildRelicControls();
+    this.openRites();
     this.buildTickBars();
     this.battleActive = true;
     this.bindInput();
+  }
+
+  /**
+   * UMA CAPSULA DE TINTA NO AR.
+   *
+   * A flecha PRECISA saber quem atirou: metade dos tracos do jogo se resolve no
+   * instante do impacto (o gelo do lich, a raiz do burocrata, o troco do caixa) e
+   * quem mata de longe tem que levar o credito do abate. Antes disto o projetil
+   * saia anonimo e o vampiro nunca engordava com as proprias flechas.
+   *
+   * A cor vem do traco de quem atirou, entao da para ler o campo de longe: se a
+   * capsula voa azul, alguem vai congelar.
+   */
+  private fireBolt(
+    a: Fighter, t: Fighter, dmg: number,
+    tint?: number, onHit?: (target: Fighter, dealt: number) => void
+  ): void {
+    const p = new Projectile(this, a.x, a.y - a.visualHeight * 0.5, t, dmg, 900, a, onHit);
+    if (tint !== undefined) p.paint(tint);
+    this.projectiles.push(p);
   }
 
   update(_time: number, delta: number): void {
@@ -152,6 +177,7 @@ export class Battle extends Phaser.Scene {
     if (this.slowmoLeft > 0) this.rampSlowmo(delta);
     if (!this.battleActive) return;
     this.combat?.update(delta);
+    this.rites?.step(delta);
     if (this.projectiles.length) {
       const dt = Math.min(delta, 60) / 1000;
       for (const p of this.projectiles) p.step(dt);
@@ -452,6 +478,9 @@ export class Battle extends Phaser.Scene {
    * `kit.regen` de cada lutador, entao ampulheta, pena, luneta e coracao viram
    * numeros no boneco e o motor nao precisa saber que reliquia existe. Espada e
    * escudo continuam nos multiplicadores globais (`dudeAtkMult`/`enemyDmgMult`).
+   *
+   * As reliquias de CLASSE nao passam por aqui: elas nao sao numeros, sao
+   * acontecimentos ("quando um inimigo cai", "quando sobrar um so"). Ver `openRites`.
    */
   private applyRelics(dude: Dude): void {
     const rs = this.relicSystem;
@@ -463,6 +492,27 @@ export class Battle extends Phaser.Scene {
     if (rg > 0) dude.range += rg;
     const regen = rs.regenPerSecond();
     if (regen > 0) dude.kit = { ...dude.kit, regen: dude.kit.regen + regen };
+  }
+
+  /**
+   * OS RITUAIS DE CLASSE ABREM A BRIGA.
+   *
+   * Tem que ser DEPOIS de `spawnDudes` e de `waveManager.spawn` — o ritual conta
+   * corpos nas duas listas e precisa que as duas existam — e depois de
+   * `buildRelicControls`, porque a corneta acende o `CARGA!` na tela e o cartaz do
+   * meteoro nao pode nascer em cima dele. Se o jogador nao tiver nenhuma das seis,
+   * `RelicRites.idle` deixa tudo isto de graca.
+   *
+   * O grito e o anel sao emprestados: o ritual e testavel justamente por nao
+   * conhecer nem Phaser nem `fx.ts`, entao quem desenha e a cena.
+   */
+  private openRites(): void {
+    const at = (b: RiteBody) => b as Fighter;
+    this.rites = new RelicRites(this.dudes, this.enemies, riteConfig(this.relicSystem), {
+      shout: (b, text, tint) => shoutText(this, at(b).x, at(b).hitY - 18, text, tint, 30),
+      burst: (b, tint) => shockRing(this, at(b).x, at(b).hitY, 170, tint)
+    });
+    this.rites.open();
   }
 
   /**
@@ -581,6 +631,8 @@ export class Battle extends Phaser.Scene {
         dudesData: this.dudesData,
         // o treino e permanente e atravessa a run; o lanche morreu nesta batalha
         trained: this.trained,
+        // o troco que o caixa arrancou durante a briga
+        bonusGold: this.combat?.bonusGold ?? 0,
         // estrela de ouro: vencer sem perder nenhum cara
         noDeath: this.dudes.every(d => d.isAlive())
       });

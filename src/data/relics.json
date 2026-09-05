@@ -9,5 +9,12 @@
   { "id": "heart", "name": "Coracao", "description": "Cura 1 de vida por segundo, sem parar", "type": "passive", "effect": { "target": "regen", "value": 1 } },
   { "id": "revive", "name": "Amuleto", "description": "Levanta o rancho com 50% de vida, 1x por briga", "type": "passive", "effect": { "target": "revive", "value": 0.5 } },
   { "id": "crown", "name": "Coroa", "description": "Sinergia de familia pede 1 cara menos", "type": "passive", "effect": { "target": "synergyReduce", "value": 1 } },
-  { "id": "coinpurse", "name": "Bolsa", "description": "+2 de ouro no fim de cada wave", "type": "passive", "effect": { "target": "goldPerWave", "value": 2 } }
+  { "id": "coinpurse", "name": "Bolsa", "description": "+2 de ouro no fim de cada wave", "type": "passive", "effect": { "target": "goldPerWave", "value": 2 } },
+
+  { "id": "warhorn", "name": "Corneta", "description": "Guerreiros abrem invulneraveis e apressados por 3s", "type": "passive", "family": "Warrior", "effect": { "target": "openImmune", "value": 3 } },
+  { "id": "graveyard", "name": "Cova", "description": "Inimigo que cai cura e engorda seus mortos-vivos", "type": "passive", "family": "Undead", "effect": { "target": "corpseFeast", "value": 6 } },
+  { "id": "union", "name": "Sindicato", "description": "Operario que cai apressa todos os outros operarios", "type": "passive", "family": "Employed", "effect": { "target": "unionRush", "value": 5 } },
+  { "id": "grimoire", "name": "Grimorio", "description": "Tracos de fantasia recarregam 35% mais rapido", "type": "passive", "family": "Fantasy", "effect": { "target": "traitHaste", "value": 0.35 } },
+  { "id": "plasma", "name": "Plasma", "description": "Escudo nos espaciais que se recarrega sozinho", "type": "passive", "family": "SciFi", "effect": { "target": "plasmaShield", "value": 0.25 } },
+  { "id": "spotlight", "name": "Holofote", "description": "O ultimo cara de acao de pe dobra ataque e pressa", "type": "passive", "family": "Action", "effect": { "target": "lastStand", "value": 1 } }
 ]

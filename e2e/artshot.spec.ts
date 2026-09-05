@@ -12,10 +12,27 @@ import { test } from '@playwright/test';
 
 const SHOTS = 'e2e/artshots';
 
+/**
+ * O CANVAS DEMORA MAIS QUE TUDO NO PRIMEIRO TESTE DA FILA.
+ *
+ * Esta maquina tem 4 nucleos, entao o Playwright abre 2 workers: dois Chromium
+ * criando contexto WebGL em SwiftShader ao mesmo tempo, mais o Vite transformando
+ * o grafo do Phaser sob demanda. Sozinho, este arquivo boota em 10.8s — contra um
+ * teto de 15s isso era 39% de folga, e a folga acabou num run de 12 testes: o
+ * `artshot menu`, que e o PRIMEIRO da fila e paga o boot frio inteiro, estourou o
+ * `waitForSelector` enquanto passava em isolamento.
+ *
+ * 30s deixa a espera do canvas na mesma ordem das esperas de cena logo abaixo
+ * (25s cada). Teto alto nao deixa teste lento passar por bom: quem manda no tempo
+ * total e o `timeout: 180000` do `playwright.config.ts`, que continua reprovando
+ * qualquer boot que de fato travou.
+ */
+const ESPERA_CANVAS = 30000;
+
 async function boot(page: any, w = 1920, h = 1080) {
   await page.setViewportSize({ width: w, height: h });
   await page.goto('/');
-  await page.waitForSelector('canvas', { timeout: 15000 });
+  await page.waitForSelector('canvas', { timeout: ESPERA_CANVAS });
   await waitScene(page, 'Menu');
 }
 
@@ -120,6 +137,53 @@ test('artshot reward reliquia', async ({ page }) => {
   }), inv);
   await waitScene(page, 'Reward');
   await page.screenshot({ path: `${SHOTS}/06-reward.png` });
+});
+
+/**
+ * A TELA MAIS CHEIA DO JOGO: wave 30 e ao mesmo tempo multipla de 10 (o CARA da
+ * decada cai) e multipla de 3 (a loja de reliquias abre). Os dois cartazes dividem
+ * a mesma faixa vertical, e e esta foto que prova que a pilula do CARA (275..321)
+ * nao encosta na banca de madeira (331..437). Com um rancho das seis familias, a
+ * mesa tambem mostra o caso mais raro: carta de classe ao lado de carta geral.
+ */
+test('artshot reward reliquia + cara', async ({ page }) => {
+  await boot(page);
+  const inv = await army(page, [3, 8, 5, 4, 3, 2]);
+  await page.evaluate((dudesData: any) => (window as any).game.scene.start('Reward', {
+    wave: 30, dudesData, economy: { gold: 64 }, noDeath: true, trained: { dude: 3 }
+  }), inv);
+  await waitScene(page, 'Reward');
+  await page.screenshot({ path: `${SHOTS}/06c-reward-reliquia-cara.png` });
+});
+
+/**
+ * O PIOR CASO DE TEXTO DA CARTA — as duas descricoes mais compridas do catalogo.
+ *
+ * `RelicSystem.test.ts` tranca a descricao em 56 caracteres porque e o que cabe em
+ * tres linhas de 23px dentro da carta (`Reward.relicCard`). Um teto em caracteres e
+ * aproximacao: quem decide se vaza e a largura de cada letra na fonte do jogo. Esta
+ * foto mostra o wrap de verdade das duas cartas mais faladeiras (CORNETA, 50, e
+ * HOLOFOTE, 49) — se alguem esticar uma descricao ate o teto e ela pingar por baixo
+ * do papel, e aqui que aparece.
+ *
+ * A MESA E FORCADA, nao sorteada: com o rancho so de GUERREIRO e ACAO, as unicas
+ * cartas de classe elegiveis sao corneta e holofote (ver `RelicShop.eligibleRelics`),
+ * e com as outras catorze ja no bolso sobram exatamente tres cartas novas para tres
+ * lugares. A bolsa entra como a geral que a regra 3 exige.
+ */
+test('artshot reward carta faladeira', async ({ page }) => {
+  await boot(page);
+  const inv = await army(page, [4, 6]);   // CARA (Acao) + CAVALEIRO (Guerreiro)
+  await page.evaluate(() => localStorage.setItem('relics', JSON.stringify([
+    'meteor', 'bomb', 'sword', 'shield', 'hourglass', 'feather', 'telescope',
+    'heart', 'revive', 'crown',
+    'graveyard', 'union', 'grimoire', 'plasma'
+  ].map(id => ({ id })))));
+  await page.evaluate((dudesData: any) => (window as any).game.scene.start('Reward', {
+    wave: 33, dudesData, economy: { gold: 80 }, noDeath: false, trained: { dude: 1 }
+  }), inv);
+  await waitScene(page, 'Reward');
+  await page.screenshot({ path: `${SHOTS}/06d-reward-carta-faladeira.png` });
 });
 
 /** Wave comum: o rodape do RANCHO, com copias e estrelas de treino. */
